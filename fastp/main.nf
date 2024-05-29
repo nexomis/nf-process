@@ -5,11 +5,11 @@ process FASTP {
   label 'mem_8G'
 
   input:
-  tuple val(sample_name), path(files, arity: 1..2)
+  tuple val(sample_name), path(files, arity: 1..2, stageAs: 'input_raw/*')
   tuple val(trim_poly_g), val(cut_right_window_size), val(cut_right_mean_qual), val(cut_tail_window_size), val(cut_tail_mean_qual), val(min_avg_qual), val(trim_poly_x), val(min_len)
 
   output:
-  tuple val("${sample_name}"), path("fastq_trimmed/${sample_name}*.fq.gz", arity: 1..2)
+  tuple val("${sample_name}"), path("${sample_name}*.fq.gz", arity: 1..2)
 
   script:
   def s_args = ""
@@ -27,12 +27,12 @@ process FASTP {
     s_args += " --trim_poly_x"
   }
   def s_args_in = "-i " + files[0]
-  def s_args_out = " -o fastq_trimmed/"
+  def s_args_out = " -o "
   if (files.size() > 1) {
     s_args += " --detect_adapter_for_pe"
     s_args_in += " -I " + files[1]
     s_args_out += sample_name + "_R1.fq.gz"
-    s_args_out += " -O fastq_trimmed/" + sample_name + "_R2.fq.gz"
+    s_args_out += " -O " + sample_name + "_R2.fq.gz"
   } else {
     s_args_out += sample_name + ".fq.gz"
   }
@@ -41,24 +41,20 @@ process FASTP {
   """
   #!/usr/bin/bash
 
-  mkdir fastq_trimmed/
-
   fastp --thread $task.cpus $s_args
 
   """
 
   stub:
-  def args_out = " fastq_trimmed/"
+  def args_out = " "
   if (files.size() > 1) {
     args_out =+ sample_name + "_R1.fq.gz"
-    args_out += " fastq_trimmed/" + sample_name + "_R2.fq.gz"
+    args_out += " " + sample_name + "_R2.fq.gz"
   } else {
     args_out =+ sample_name + ".fq.gz"
   }
   """
   #!/usr/bin/bash
-
-  mkdir fastq_trimmed/
 
   touch $args_out
 
