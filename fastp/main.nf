@@ -6,42 +6,37 @@ process FASTP {
 
   input:
   tuple val(sample_name), path(files, arity: 1..2, stageAs: 'input_raw/*')
-  tuple val(trim_poly_g), val(cut_right_window_size), val(cut_right_mean_qual), val(cut_tail_window_size), val(cut_tail_mean_qual), val(min_avg_qual), val(trim_poly_x), val(min_len)
 
   output:
   tuple val("${sample_name}"), path("${sample_name}*.fq.gz", arity: 1..2)
 
   script:
-  def s_args = ""
-  if (trim_poly_g) {
-    s_args += " --trim_poly_g"
-  }
-  s_args += " --cut_right_window_size " + cut_right_window_size
-  s_args += " --cut_right_mean_quality " + cut_right_mean_qual
-  s_args += " --cut_right"
-  s_args += " --cut_tail_window_size " + cut_tail_window_size
-  s_args += " --cut_tail_mean_quality " + cut_tail_mean_qual
-  s_args += " --cut_tail"
-  s_args += " --average_qual " + min_avg_qual 
-  if (trim_poly_x) {
-    s_args += " --trim_poly_x"
-  }
-  def s_args_in = "-i " + files[0]
-  def s_args_out = " -o "
+  def default_args = "--trim_poly_g"
+  default_args += " --cut_right_window_size 4" 
+  default_args += " --cut_right_mean_quality 20" 
+  default_args += " --cut_right"
+  default_args += " --cut_tail_window_size 4" 
+  default_args += " --cut_tail_mean_quality 25" 
+  default_args += " --cut_tail"
+  default_args += " --average_qual 25"
+  default_args += " --trim_poly_x"
+  default_args += " --length_required 31"
+
+  def in_args = "-i " + files[0]
+  def out_args = " -o "
   if (files.size() > 1) {
-    s_args += " --detect_adapter_for_pe"
-    s_args_in += " -I " + files[1]
-    s_args_out += sample_name + "_R1.fq.gz"
-    s_args_out += " -O " + sample_name + "_R2.fq.gz"
+    in_args += " -I " + files[1]
+    in_args += " --detect_adapter_for_pe"
+    out_args += sample_name + "_R1.fq.gz"
+    out_args += " -O " + sample_name + "_R2.fq.gz"
   } else {
-    s_args_out += sample_name + ".fq.gz"
+    out_args += sample_name + ".fq.gz"
   }
-  s_args = s_args_in + s_args_out + s_args
   
   """
   #!/usr/bin/bash
 
-  fastp --thread $task.cpus $s_args
+  fastp --thread $task.cpus ${task.ext.args ?: default_args} $in_args $out_args
 
   """
 
