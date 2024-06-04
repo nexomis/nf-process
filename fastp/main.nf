@@ -43,10 +43,10 @@ process FASTP {
   stub:
   def args_out = " "
   if (files.size() > 1) {
-    args_out =+ sample_name + "_R1.fq.gz"
+    args_out += sample_name + "_R1.fq.gz"
     args_out += " " + sample_name + "_R2.fq.gz"
   } else {
-    args_out =+ sample_name + ".fq.gz"
+    args_out += sample_name + ".fq.gz"
   }
   """
   #!/usr/bin/bash
