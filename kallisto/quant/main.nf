@@ -1,5 +1,19 @@
+def getKallistoStrandArgs (reads_orientation) {  // create a method only to including this command in the script AND in the stub part, while minimizing code repetition
+    def list_reads_orientation = ["unstranded", "fr-stranded"  , "rf-stranded"  ]
+    def list_kallisto_strands =  [""          , "--fr-stranded", "--rf-stranded"]
+    def hit_index = list_reads_orientation.indexOf(reads_orientation)
+    if (hit_index >= 0) {
+        return list_kallisto_strands[hit_index]
+    } else {
+        throw new IllegalArgumentException("Invalid value for reads_orientation: '$reads_orientation'. Expected one of: $list_reads_orientation.")
+    }
+}
+
+//--fragment-length: 0 if UTR, unless if PE and recquired if SE
+//--single : ??
+
 process KALLISTO_QUANT {
-    container 'ghcr.io/nexomis/kallisto:v0.50.1'
+    container 'quay.io/biocontainers/kallisto:0.50.1--h6de1650_2'
     tag "$smpl_name"
 
     label 'cpu_medium'
@@ -8,27 +22,27 @@ process KALLISTO_QUANT {
     input:
     tuple val(smpl_name), path(reads, arity: 1..2)
     path index
+    val(reads_orientation)
 
     output:
     tuple val(smpl_name), path(smpl_name)
 
-    //add $strand (not recquired, in case of unstranded library ?)
-    //--fragment-length: 0 if UTR, unless if PE, recquired if SE
-    //--single : ??
 
     script:
-
+    def kallisto_strand = getKallistoStrandArgs(reads_orientation)
     """
     #!/usr/bin/bash
 
     kallisto quant --threads ${task.cpus} \\
         --index ${index} \\
         --output-dir ${smpl_name} \\
+        ${kallisto_strand} \\
         ${task.ext.args ?: ''} \\
         ${reads}
     """
 
     stub:
+    def kallisto_strand = getKallistoStrandArgs(reads_orientation)
     """
     #!/usr/bin/bash
 
