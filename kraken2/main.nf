@@ -5,15 +5,15 @@ process KRAKEN2 {
   label 'mem_8G'
 
   input:
-  tuple val(sample_name), path(files, arity: 1..2, stageAs: 'input_raw/*')
+  tuple val(meta), path(files, arity: 1..2, stageAs: 'input_raw/*')
   path db
 
   output:
-  tuple val(sample_name), path("*.classified*")       , optional:true, emit: classified_reads_fastq
-  tuple val(sample_name), path("*.unclassified*")     , optional:true, emit: unclassified_reads_fastq
-  tuple val(sample_name), path("*classifiedreads.txt"), optional:true, emit: classified_reads_assignment
-  tuple val(sample_name), path("*.report.txt")        , emit: report
-  tuple val(sample_name), path("*.output.txt")        , emit: output
+  tuple val(meta), path("*.classified*")       , optional:true, emit: classified_reads_fastq
+  tuple val(meta), path("*.unclassified*")     , optional:true, emit: unclassified_reads_fastq
+  tuple val(meta), path("*classifiedreads.txt"), optional:true, emit: classified_reads_assignment
+  tuple val(meta), path("*.report.txt")        , emit: report
+  tuple val(meta), path("*.output.txt")        , emit: output
 
   // modify ext from config to enable classified and unclassified
   // ext:
@@ -43,9 +43,9 @@ process KRAKEN2 {
   
   if (files.size() > 1) {
     rename_paired_inputs = "mkdir input_renamed ; "
-    rename_paired_inputs += "ln -sf \$PWD/" + files[0] + " \$PWD/input_renamed/" + sample_name + "_1" + fq_ext + "; "
-    rename_paired_inputs += "ln -sf \$PWD/" + files[1] + " \$PWD/input_renamed/" + sample_name + "_2" + fq_ext
-    in_args = "--paired input_renamed/" + sample_name + "_1" + fq_ext + " input_renamed/" + sample_name + "_2" + fq_ext
+    rename_paired_inputs += "ln -sf \$PWD/" + files[0] + " \$PWD/input_renamed/" + meta.id + "_1" + fq_ext + "; "
+    rename_paired_inputs += "ln -sf \$PWD/" + files[1] + " \$PWD/input_renamed/" + meta.id + "_2" + fq_ext
+    in_args = "--paired input_renamed/" + meta.id + "_1" + fq_ext + " input_renamed/" + meta.id + "_2" + fq_ext
   } else {
     in_args += files[0]
   }
@@ -58,13 +58,13 @@ process KRAKEN2 {
   $rename_paired_inputs
 
   kraken2 --thread $task.cpus \\
-  --output ${sample_name}.output.txt --report ${sample_name}.report.txt \\
+  --output ${meta.id}.output.txt --report ${meta.id}.report.txt \\
   --db $db \\
   ${task.ext.args ?: ''} \\
   $compress_args $in_args
   ec=\$?
 
-  rename 's/^(classified|unclassified)/${sample_name}.\$1/' {classified,unclassified}* 2>/dev/null && exit \$ec || exit \$ec
+  rename 's/^(classified|unclassified)/${meta.id}.\$1/' {classified,unclassified}* 2>/dev/null && exit \$ec || exit \$ec
 
   """
 
@@ -72,8 +72,8 @@ process KRAKEN2 {
   """
   #!/usr/bin/bash
 
-  touch ${sample_name}.output.txt
-  touch ${sample_name}.report.txt
+  touch ${meta.id}.output.txt
+  touch ${meta.id}.report.txt
 
   """
 
