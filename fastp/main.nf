@@ -5,10 +5,10 @@ process FASTP {
   label 'mem_8G'
 
   input:
-  tuple val(sample_name), path(files, arity: 1..2, stageAs: 'input_raw/*')
+  tuple val(meta), path(files, arity: 1..2, stageAs: 'input_raw/*')
 
   output:
-  tuple val("${sample_name}"), path("${sample_name}*.fq.gz", arity: 1..2)
+  tuple val(meta), path("${meta.id}*.fq.gz", arity: 1..2)
 
   script:
   def default_args = "--trim_poly_g"
@@ -27,10 +27,10 @@ process FASTP {
   if (files.size() > 1) {
     in_args += " -I " + files[1]
     in_args += " --detect_adapter_for_pe"
-    out_args += sample_name + "_R1.fq.gz"
-    out_args += " -O " + sample_name + "_R2.fq.gz"
+    out_args += meta.id + "_R1.fq.gz"
+    out_args += " -O " + meta.id + "_R2.fq.gz"
   } else {
-    out_args += sample_name + ".fq.gz"
+    out_args += meta.id + ".fq.gz"
   }
   
   """
@@ -43,10 +43,10 @@ process FASTP {
   stub:
   def args_out = " "
   if (files.size() > 1) {
-    args_out += sample_name + "_R1.fq.gz"
-    args_out += " " + sample_name + "_R2.fq.gz"
+    args_out += meta.id + "_R1.fq.gz"
+    args_out += " " + meta.id + "_R2.fq.gz"
   } else {
-    args_out += sample_name + ".fq.gz"
+    args_out += meta.id + ".fq.gz"
   }
   """
   #!/usr/bin/bash

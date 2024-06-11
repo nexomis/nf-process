@@ -7,11 +7,11 @@ process FASTQC {
   label 'mem_8G'
 
   input:
-  tuple val(sample_name), path(files, arity: 1..2)
+  tuple val(meta), path(files, arity: 1..2)
 
   output:
-  tuple val(sample_name), path("*.html"), emit: html
-  tuple val(sample_name), path("*.zip") , emit: zip
+  tuple val(meta), path("*.html"), emit: html
+  tuple val(meta), path("*.zip") , emit: zip
 
   script:
   def memory_in_mb = MemoryUnit.of("${task.memory}").toUnit('MB')
@@ -25,11 +25,11 @@ process FASTQC {
   """
 
   stub:
-  def zip_stub = sample_name
-  def html_stub = sample_name
+  def zip_stub = meta.id
+  def html_stub = meta.id
   if (files.size() > 1) {
-    zip_stub += "_R1.zip " + sample_name + "_R2.zip"
-    html_stub += "_R1.html " + sample_name + "_R2.html"
+    zip_stub += "_R1.zip " + meta.id + "_R2.zip"
+    html_stub += "_R1.html " + meta.id + "_R2.html"
   } else {
     zip_stub += ".zip"
     html_stub += ".html"
