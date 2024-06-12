@@ -1,8 +1,8 @@
 process KRAKEN2 {
   container 'ghcr.io/nexomis/kraken2:2.1.3'
 
-  label 'cpu_medium'
-  label 'mem_8G'
+  label 'cpu_med'
+  label 'mem_4G_per_cpu'
 
   input:
   tuple val(meta), path(files, arity: 1..2, stageAs: 'input_raw/*')
