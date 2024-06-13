@@ -4,7 +4,7 @@ process FASTQC {
   container 'staphb/fastqc:0.12.1'
 
   label 'cpu_low'
-  label 'mem_8G'
+  label 'mem_12G'
 
   input:
   tuple val(meta), path(files, arity: 1..2)
@@ -14,7 +14,7 @@ process FASTQC {
   tuple val(meta), path("*.zip") , emit: zip
 
   script:
-  def memory_in_mb = MemoryUnit.of("${task.memory}").toUnit('MB')
+  def memory_in_mb = MemoryUnit.of("${task.memory}").toUnit('MB') - 512
   def fastqc_memory = memory_in_mb > 10000 ? 10000 : (memory_in_mb < 100 ? 100 : memory_in_mb)
   
   """
