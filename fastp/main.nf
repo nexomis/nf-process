@@ -8,7 +8,8 @@ process FASTP {
   tuple val(meta), path(files, arity: 1..2, stageAs: 'input_raw/*')
 
   output:
-  tuple val(meta), path("${meta.id}*.fq.gz", arity: 1..2)
+  tuple val(meta), path("${meta.id}*.fq.gz", arity: 1..2), emit: reads
+  tuple val(meta), path("${meta.id}.json", arity: 1), emit: report
 
   script:
   def default_args = "--trim_poly_g"
@@ -36,7 +37,9 @@ process FASTP {
   """
   #!/usr/bin/bash
 
-  fastp --thread $task.cpus ${task.ext.args ?: default_args} $in_args $out_args
+  fastp --thread $task.cpus ${task.ext.args ?: default_args} \\
+  --json ${meta.id}.json \\
+  $in_args $out_args
 
   """
 
@@ -52,6 +55,7 @@ process FASTP {
   #!/usr/bin/bash
 
   touch $args_out
+  touch ${meta.id}.json
 
   """
 
