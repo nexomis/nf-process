@@ -16,7 +16,7 @@ process SPRING_DECOMPRESS {
   """
   #!/usr/bin/bash
 
-  spring -d -g -t ${task.cpus} -i ${meta.id}.spring -o ${meta.id}.fq.gz
+  spring -d -g -t ${task.cpus} -i $spring_file -o ${meta.id}.fq.gz
   if [[ -e ${meta.id}.fq.gz.1 && -e ${meta.id}.fq.gz.2 ]]; then
     # Move (rename) the files
     mv ${meta.id}.fq.gz.1 ${meta.id}_R1.fq.gz
