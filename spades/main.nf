@@ -11,11 +11,15 @@ process SPADES {
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
   
   output:
-  tuple val(meta), path("$meta.id", type: 'dir'), optional:false, emit: output_dir
-  tuple val(meta), path("${meta.id}.log", type: 'file'), optional:false, emit: log
-  //tuple val(meta), path('${meta.id}/${meta.id}.scaffolds.fa'), optional:false, emit: scaffolds
-  //tuple val(meta), path('${meta.id}/${meta.id}.contigs.fa'), optional:false, emit: contigs
-  //tuple val(meta), path('${meta.id}/${meta.id}.scaffolds.gfa'), optional:true, emit: gfa
+  tuple val(meta), path("${meta.id}", type: 'dir')                                      , optional:false, emit: output_dir
+  tuple val(meta), path("${meta.id}/scaffolds.fasta", type: 'file')                     , optional:true , emit: scaffolds
+  tuple val(meta), path("${meta.id}/contigs.fasta", type: 'file')                       , optional:true , emit: contigs
+  tuple val(meta), path("${meta.id}/transcripts.fasta", type: 'file')                   , optional:true , emit: transcripts
+  tuple val(meta), path("${meta.id}/gene_clusters.fasta", type: 'file')                 , optional:true , emit: gene_clusters
+  tuple val(meta), path("${meta.id}/assembly_graph_with_scaffolds.fasta", type: 'file') , optional:true , emit: gfa
+  tuple val(meta), path("${meta.id}/spades.log"), type: 'file'                          , optional:false, emit: log_tools
+  tuple val(meta), path("${meta.id}.log", type: 'file')                                 , optional:false, emit: log
+
 
   script:
   """
@@ -25,7 +29,7 @@ process SPADES {
   # run SPAdes : spadesMode (rnaviral) on meta.spades_args (not on task.ext.args) ?
   spades.py --threads ${task.cpus} \\
     --memory \${mem_int} \\
-    -o ${meta.id}_all_out \\
+    -o ${meta.id} \\
     ${ (reads.size() == 1) ? "-s ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
     ${meta.spades_args ?: ''} \\
     ${task.ext.args ?: ''} \\
@@ -33,16 +37,9 @@ process SPADES {
 
   # Select output files :
   mkdir ${meta.id}
-  if [ -f ${meta.id}_all_out/scaffolds.fasta ]; then   # else - TODO: print Big Warning Message ?!
-    mv ${meta.id}_all_out/scaffolds.fasta ${meta.id}/${meta.id}.scaffolds.fa
+  if [ ! -f ${meta.id}/scaffolds.fasta ]; then   # else - TODO: print big Warning Message ?!
+    echo "WARNING : scaffolds file not generated,: use contigs of raw_contigs instead ?? (and contigs.gfa instead of scaffolds.gfa)
   fi
-  if [ -f ${meta.id}_all_out/contigs.fasta ]; then   # else - TODO: export raw_contigs.fa ?
-    mv ${meta.id}_all_out/contigs.fasta ${meta.id}/${meta.id}.contigs.fa
-  fi
-  if [ -f ${meta.id}_all_out/assembly_graph_with_scaffolds.fasta ]; then   # esle - TODO: export contigs.gfa ?
-    mv ${meta.id}_all_out/assembly_graph_with_scaffolds.gfa ${meta.id}/${meta.id}.scaffolds.gfa
-  fi
-  mv ${meta.id}_all_out/spades.log ${meta.id}/${meta.id}.log
   """
 
   stub:

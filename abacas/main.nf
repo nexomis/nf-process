@@ -7,12 +7,17 @@ process ABACAS {
   input:
   tuple val(meta), path(scaffolds, arity: 1, stageAs: 'input_raw/*')
   path (ref_genome)
-  val(MUMmer_program)
-  val keep_on_output  //  = 'scaffold'
 
   output:
-  tuple val(meta), path("$meta.id", type: 'dir'), optional:false, emit: output_dir
-  tuple val(meta), path("${meta.id}.log", type: 'file'), optional:false, emit: log
+  tuple val(meta), path("${meta.id}", type: 'dir')                          , optional:false, emit: output_dir
+  tuple val(meta), path("${meta.id}/${meta.id}.fasta", type: 'file')        , optional:false, emit: scaffold
+  tuple val(meta), path("${meta.id}/${meta.id}.*", type: 'file')            , optional:false, emit: act
+  tuple val(meta), path("unused_contigs.out", type: 'file')                 , optional:false, emit: unused_contigs
+  tuple val(meta), path("${meta.id}.log", type: 'file')                     , optional:false, emit: log
+  // tuple val(meta), path("${task.ext.mummer_program}.*", type: 'file')    , optional:false , emit: mumer
+  // tuple val(meta), path("reference.notMapped.contigs.tab", type: 'file') , optional:true  , emit: ref_tab
+  // tuple val(meta), path("reference.Repeats.plot", type: 'file')          , optional:true  , emit: ref_plot
+
 
   script:
   """
@@ -22,40 +27,20 @@ process ABACAS {
   abacas.pl -r ${ref_genome} \\
     -q ${scaffolds} \\
     -o ${meta.id} \\
-    -p ${MUMmer_program}
+    -p ${task.ext.mummer_program ?: 'nucmer'} \\
     ${meta.abacas_args ?: ''} \\
-    ${task.ext.args ?: ''} \\
     2> ${meta.id}.log
-
-  # manage output :
-  mkdir ${meta.id}/
-  mv ${meta.id}.fasta ${meta.id}/${meta.id}.fasta
-
-  case "${keep_on_output}" in
-    "all")
-      mv unused_contigs.out ${MUMmer_program}.* ${meta.id}.* ${meta.id}/
-      ;;
-    "include_extended_act_files")
-      mv ${meta.id}.* ${meta.id}/
-      ;;
-    "include_act_files")
-      mv ${meta.id}.crunch ${meta.id}.fasta ${meta.id}/
-      ;;
-    "scaffold")
-      :
-      ;;
-    *)
-      echo "No valid include option provided ('keep_on_output': 'scaffold', 'include_act_files', 'include_extended_act_files' or 'all'): defaulting to 'scaffold'."
-      ;;
-  esac
+  
+  mkdir ${meta.id}
+  cp ${meta.id}* ${meta.id}/
+  rm ${meta.id}/${meta.id}.log
   """
 
   stub:
   """
   #!/usr/bin/bash
-
   mkdir ${meta.id}
-  touch ${meta.id}.log ${meta.id}/${meta.id}.fasta 
+  touch ${meta.id}/${meta.id}.fasta ${meta.id}/${meta.id}.tab ${meta.id}/${meta.id}.bin ${meta.id}/${meta.id}.crunch ${meta.id}/${meta.id}.gaps
+  touch ${meta.id}.log ${meta.id}.fasta ${meta.id}.tab ${meta.id}.bin ${meta.id}.crunch ${meta.id}.gaps  unused_contigs.out ${task.ext.mummer_program}.delta ${task.ext.mummer_program}.filtered.delta  ${task.ext.mummer_program}.tiling
   """
 }
-
