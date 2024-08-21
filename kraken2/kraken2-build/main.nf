@@ -1,5 +1,5 @@
 process KRAKEN2_BUILD_CUSTOM_DB {
-  container 'quay.io/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_1'  // too big img !! Create a new one dedicated to "simple" index building from 'ghcr.io/nexomis/kraken2:2.1.3' and including missing tools (rsync, tools for remove low complexity, ... but no need to include all recquired tools (ex: peptide sequence inclusion tools))
+  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/kraken2:2.1.3--pl5321hdcf5f25_1"  // too big img !! Create a new one dedicated to "simple" index building from 'ghcr.io/nexomis/kraken2:2.1.3' and including missing tools (rsync, tools for remove low complexity, ... but no need to include all recquired tools (ex: peptide sequence inclusion tools))
 
   label 'cpu_high'
   label 'mem_4G_per_cpu'

@@ -1,5 +1,5 @@
 process ABACAS {
-  container "${params.biocontainers_registry ?: 'quay.io/biocontainers/abacas:1.3.1--pl5321hdfd78af_3'}"
+  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/abacas:1.3.1--pl5321hdfd78af_3"
 
   label 'cpu_med'
   label 'mem_8G'

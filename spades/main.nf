@@ -2,7 +2,7 @@
 // (even if compatible with the 'spades' tool, cases with several independent input files are not handled here, this inclued additional librarie or hybrid approach).
 
 process SPADES {
-  container "${params.biocontainers_registry ?: 'quay.io/biocontainers/spades:4.0.0--h5fb382e_2'}"
+  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/spades:4.0.0--h5fb382e_2"
 
   label 'cpu_high'
   label 'mem_high'
