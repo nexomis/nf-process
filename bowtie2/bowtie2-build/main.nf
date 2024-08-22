@@ -9,8 +9,9 @@ process BOWTIE2_BUILD {
   tuple val(meta), path(fasta, arity: 1, stageAs: 'input_raw/*')
 
   output:
-  tuple val(meta), path("${meta.id}") , emit: idx
-  path "${meta}.log"                  , emit: log
+  tuple val(meta), path("${meta.id}", type: 'dir')     , emit: idx
+  tuple val(meta), path("${meta.id}.log", type: 'file'), emit: log
+  // output_dir: usefull ?
 
   script:
 
@@ -18,7 +19,11 @@ process BOWTIE2_BUILD {
   #!/usr/bin/bash
 
   mkdir ${meta.id}/
-  bowtie2-build ${task.ext.args ?: ''} --threads $task.cpus $fasta ${meta.id}/${meta.id} 2>${meta.id}.log
+  bowtie2-build --threads $task.cpus \\
+    ${task.ext.args ?: ''} \\
+    $fasta \\
+    ${meta.id}/${meta.id} \\
+    2>${meta.id}.log
   """
 
   stub:
@@ -27,6 +32,6 @@ process BOWTIE2_BUILD {
   #!/usr/bin/bash
 
   mkdir ${meta.id}/
-  touch mkdir ${meta.id}/${meta.id}.rev.1.bt2 ${meta.id}.log
+  touch ${meta.id}/${meta.id}.rev.1.bt2 ${meta.id}.log
   """
 }

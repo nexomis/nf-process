@@ -12,11 +12,15 @@ process BOWTIE2 {
   output:
   tuple val(meta), path("${meta.id}.sam") , emit: sam
   tuple val(meta), path("${meta.id}.log") , emit: log
+  // output_dir: usefull ?
 
   script:
 
   // TODO: check and manage if necessary option to extract unmapped read on fastq file (maybe not via task.ext if depend of reads are SE or PE): '--un-conc[-gz]' '--un[-gz]'
   // in addition with extraction of unmapped reads, the default settings can be '--no-unal' (exclusion of unmapped reads from output SAM)
+
+  args_mapping_mode = task.ext.mapping_mode ? "--${task.ext.mapping_mode}" : "--end-to-end"
+  // useful to redefine the default mapping_mode value (already defined in nextflow.config)?
 
   """
   #!/usr/bin/bash
@@ -32,13 +36,13 @@ process BOWTIE2 {
   fi
 
   bowtie2 \\
-    ${task.ext.args_mapping_mode ?: '--end-to-end'} \\
-    -x \$index_w_bn \\
+    ${args_mapping_mode} \\
+    -x \$idx_w_prefix \\
     ${ (reads.size() == 1) ? "-U ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
     --threads $task.cpus \\
-    ${task.ext.args ?: ''} \\
     -S ${meta.id}.sam \\
-    2 > ${meta.id}.log
+    ${task.ext.args ?: ''} \\
+    2> ${meta.id}.log
   """
 
   stub:

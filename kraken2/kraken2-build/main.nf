@@ -15,7 +15,8 @@ process KRAKEN2_BUILD_CUSTOM_DB {
   output:
   tuple val(meta), path("${meta.id}", type: 'dir'), optional:false, emit: db
   tuple val(meta), path("${meta.id}.log", type: 'file'), optional:false, emit: log
-
+  // output_dir usefull ?
+  
   script:
 
   // --download-library: maybe is better with "--use-ftp" (instead of rsync)
@@ -28,14 +29,14 @@ process KRAKEN2_BUILD_CUSTOM_DB {
 
   kraken2-build --db ${meta.id}/ --threads $task.cpus --download-taxonomy ${task.ext.args_dl-tax ?: ''} 2>${meta.id}.log
 
-  ${library ? "kraken2-build --download-library --db ${meta.id}/ --threads $task.cpus $library ${task.ext.args_dl-lib ?: ''} 2>>${meta.id}.log" : "# pass '--download-library' library step because no 'library' has specified"}
+  ${library ? "kraken2-build --db ${meta.id}/ --threads $task.cpus --download-library $library ${task.ext.args_dl-lib ?: ''} 2>>${meta.id}.log" : "# pass '--download-library' library step because no 'library' has specified"}
 
   if [ -d "${fa_to_add}" ]; then
       find ${fa_to_add} -type f \\( -name "*.fa" -o -name "*.fna" -o -name "*.fasta" -o -name "*.fa.gz" -o -name "*.fna.gz" -o -name "*.fasta.gz" \\) | while read fa_file; do
-          kraken2-build --add-to-library --db ${meta.id}/ "$fa_file" ${task.ext.args_add-lib ?: ''} 2>>${meta.id}.log
+          kraken2-build --db ${meta.id}/ --add-to-library "$fa_file" ${task.ext.args_add-lib ?: ''} 2>>${meta.id}.log
       done
   else
-      kraken2-build --add-to-library --db ${meta.id}/ ${fa_to_add} ${task.ext.args_add-lib ?: ''} 2>>${meta.id}.log
+      kraken2-build --db ${meta.id}/ --add-to-library ${fa_to_add} ${task.ext.args_add-lib ?: ''} 2>>${meta.id}.log
   fi
 
   kraken2-build --build --db ${meta.id}/ --threads $task.cpus ${task.ext.args_build ?: ''} 2>>${meta.id}.log
