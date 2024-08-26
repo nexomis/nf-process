@@ -5,7 +5,6 @@ process SPADES {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/spades:4.0.0--h5fb382e_2"
 
   label 'cpu_high'
-  label 'mem_high'
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
@@ -19,14 +18,15 @@ process SPADES {
   //!!! tuple val(meta), path("${meta.id}", type: 'dir')                              , optional:false, emit: output_dir  // usefull ?
 
   script:
+  def memory_in_gbit = MemoryUnit.of("${task.memory}").toUnit('GB') * 8
+  def memory_in_gbit_min1 = Math.max(memory_in_gbit, 1)
 
   """
   #!/usr/bin/bash
   
-  mem_int=\$(echo '${task.memory}' | sed "s/[^0-9. ]*\$//")  # task.memory must be in Gb .... | TODO: manage other unit !
   # run SPAdes : spadesMode (rnaviral) on meta.spades_args (not on task.ext.args) ?
   spades.py --threads ${task.cpus} \\
-    --memory \${mem_int} \\
+    --memory ${memory_in_gbit_min1} \\
     -o ${meta.id} \\
     ${ (reads.size() == 1) ? "-s ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
     ${meta.spades_args ?: ''} \\
@@ -41,9 +41,11 @@ process SPADES {
   """
 
   stub:
+  def memory_in_gbit = MemoryUnit.of("${task.memory}").toUnit('GB') * 8
+  def memory_in_gbit_min1 = Math.max(memory_in_gbit, 1)
+  
   """
   #!/usr/bin/bash
-
   mkdir ${meta.id}
   touch ${meta.id}.log ${meta.id}/scaffolds.fasta ${meta.id}/contigs.fasta ${meta.id}/assembly_graph_with_scaffolds.gfa ${meta.id}/spades.log
   """
