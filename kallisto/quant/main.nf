@@ -16,6 +16,7 @@ process KALLISTO_QUANT {
   script:
   """
   #!/usr/bin/bash
+  
   kallisto quant --threads ${task.cpus} \\
     --index ${index} \\
     --output-dir ${meta.id} \\

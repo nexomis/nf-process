@@ -2,7 +2,7 @@ process KRAKEN2 {
   container 'ghcr.io/nexomis/kraken2:2.1.3'
 
   label 'cpu_med'
-  label 'mem_4G_per_cpu'
+  label 'mem_4G_per_cpu' // params.kraken2_memory ?
 
   input:
   tuple val(meta), path(files, arity: 1..2, stageAs: 'input_raw/*')
@@ -50,8 +50,11 @@ process KRAKEN2 {
     in_args += files[0]
   }
   
-  
-  
+  def args_save_unclassified = ''
+  if (task.ext.save_unclassified) {
+    args_save_unclassified = (files.size() == 1) ? "--unclassified-out ${meta.id}.unclassified.fastq" : "--unclassified-out ${meta.id}.unclassified#.fastq"
+  }
+
   """
   #!/usr/bin/bash
 
@@ -60,6 +63,7 @@ process KRAKEN2 {
   kraken2 --thread $task.cpus \\
   --output ${meta.id}.output.txt --report ${meta.id}.report.txt \\
   --db $db \\
+  ${args_save_unclassified} \\
   ${task.ext.args ?: ''} \\
   $compress_args $in_args
   ec=\$?
@@ -69,12 +73,16 @@ process KRAKEN2 {
   """
 
   stub:
+  def cmd_reads2 = ""
+  if (files.size() > 1) {
+    cmd_reads2 = "touch ${meta.id}.unclassified_R2.fq ${meta.id}.classified_R2.fq"
+  }
   """
   #!/usr/bin/bash
 
-  touch ${meta.id}.output.txt
-  touch ${meta.id}.report.txt
-
+  touch ${meta.id}.output.txt ${meta.id}.report.txt ${meta.id}.classifiedreads.txt
+  touch ${meta.id}.unclassified_R1.fq ${meta.id}.classified_R1.fq
+  ${cmd_reads2}
   """
 
 }

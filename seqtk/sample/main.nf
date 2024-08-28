@@ -35,7 +35,7 @@ process SEQTK_SAMPLE {
   def cmd_reads1 = "touch ${meta.id}_R1.fq"
   def cmd_reads2 = ""
   if (files.size() > 1) {
-    cmd_reads2 = "touch > ${meta.id}_R2.fq"
+    cmd_reads2 = "touch ${meta.id}_R2.fq"
   }
   """
   #!/usr/bin/bash
