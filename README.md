@@ -82,3 +82,6 @@ It is recommended to tag processes with labels that control at least the number 
 
 ### 6.2 Adaptive Resource Allocation
 When it is necessary to access task resources within the process (e.g., specify the number of threads or memory in a tool's execution command line), these resources should be accessed via `task.mem`, `task.ncpu`, etc.
+
+## Typography
+See [interest section on global rules](https://github.com/nexomis/nf-template/blob/main/CONTRIBUTE.md#typography)
