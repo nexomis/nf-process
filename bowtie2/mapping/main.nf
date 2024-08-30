@@ -19,9 +19,6 @@ process BOWTIE2 {
   // TODO: check and manage if necessary option to extract unmapped read on fastq file (maybe not via task.ext if depend of reads are SE or PE): '--un-conc[-gz]' '--un[-gz]'
   // in addition with extraction of unmapped reads, the default settings can be '--no-unal' (exclusion of unmapped reads from output SAM)
 
-  args_mapping_mode = task.ext.mapping_mode ? "--${task.ext.mapping_mode}" : "--end-to-end"
-  // useful to redefine the default mapping_mode value (already defined in nextflow.config)?
-
   """
   #!/usr/bin/bash
 
@@ -36,7 +33,6 @@ process BOWTIE2 {
   fi
 
   bowtie2 \\
-    ${args_mapping_mode} \\
     -x \$idx_w_prefix \\
     ${ (reads.size() == 1) ? "-U ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
     --threads $task.cpus \\

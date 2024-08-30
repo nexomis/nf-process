@@ -12,8 +12,8 @@ process ABACAS {
   tuple val(meta), path("${meta.id}/${meta.id}.fasta", type: 'file')             , optional:false, emit: scaffolds
   tuple val(meta), path("${meta.id}/${meta.id}.*", type: 'file')                 , optional:false, emit: act
   tuple val(meta), path("${meta.id}/unused_contigs.out", type: 'file')           , optional:false, emit: unused_contigs
-  tuple val(meta), path("${meta.id}/${task.ext.mummer_program}.*", type: 'file') , optional:false , emit: mumer
   tuple val(meta), path("${meta.id}.log", type: 'file')                          , optional:false, emit: log
+  // tuple val(meta), path("${meta.id}/${task.ext.mummer_program}.*", type: 'file') , optional:false , emit: nucmer
   // tuple val(meta), path("reference.notMapped.contigs.tab", type: 'file')      , optional:true  , emit: ref_tab
   // tuple val(meta), path("reference.Repeats.plot", type: 'file')               , optional:true  , emit: ref_plot
   //!!!!! tuple val(meta), path("${meta.id}", type: 'dir')                       , optional:false, emit: output_dir  // usefull ?
@@ -33,6 +33,7 @@ process ABACAS {
     ${task.ext.args ?: '-p nucmer'} \\
     2> ../${meta.id}.log
   cd ../
+
   """
 
   stub:
