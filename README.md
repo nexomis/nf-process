@@ -24,8 +24,8 @@ Minimize copying (`cp`), especially for large files. To place all outputs of a t
 Should there be cases where the use of `mv`/`cp` is unavoidable on large files, in order to make these worflows usable on the cloud, we will activate `scratch` for the process concerned.
 
 ## 3. Handling Paths as Queue Channels
-
-*Unless in exceptional cases,* paths in queue channels should be passed and retrieved as tuples: `val(meta), path(file/dir)`.
+When paths in queue channels **is necessarily** depend on a sample (or more globally on a featires), channels should be passed and retrieved as tuples: `val(meta), path(file/dir)`.
+This is the case, for example, for reads path for analyses at sample level or for genome path on worflows whose aim is to create index.
 
 ### 3.2 Structure of Queue Channels for Paths (input **and** output)
 - The first element of these queue channels should be a map named `meta`, which includes at least a unique identifier (`meta.id`).
