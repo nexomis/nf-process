@@ -47,7 +47,7 @@ Note: When appropriate and not detrimental to the process, it is preferable to p
 ## 4. Arguments and Argument Management
 
 ### 4.1 Default Arguments
-The default values of arguments used in the processes should be defined at the process level and not upstream in the workflow (e.g., `fastp` process).
+The default values of arguments used in the processes should be defined at the process level and not upstream in the workflow (e.g., `fastp` process:  `fastp --thread $task.cpus ${task.ext.args ?: default_args} \\` https://github.com/nexomis/nf-process/blob/fc42479b5bc0e1bc3631c3446d47b4f068df554b/fastp/main.nf).
 
 ### 4.2 Sample-Specific Arguments
 For sample-specific arguments defined by elements external to the process (e.g., defined by the user in the sample sheet), the arguments will be stored in `meta` according to two possible options: `meta.args` or `meta.args_<toolsName>`.
