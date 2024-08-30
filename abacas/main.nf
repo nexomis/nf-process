@@ -30,8 +30,7 @@ process ABACAS {
   abacas.pl -r ../${ref_genome} \\
     -q ../${scaffolds} \\
     -o ${meta.id} \\
-    -p ${task.ext.mummer_program ?: 'nucmer'} \\
-    ${task.ext.args ?: ''} \\
+    ${task.ext.args ?: '-p nucmer'} \\
     2> ../${meta.id}.log
   cd ../
   """
