@@ -8,10 +8,7 @@ process SAM_BAM_SORT_IDX {
   tuple val(meta), path(sam, arity: 1, stageAs: 'input_raw/*')
 
   output:
-  tuple val(meta), path("${meta.id}.bam") , emit: bam
-  tuple val(meta), path("${meta.id}.bam.bai") , emit: bai
-  //tuple val(meta), path("${meta.id}.bam", "${meta.id}.bai") , emit: bam_bai
-  // output_dir usefull ?
+  tuple val(meta), path("${meta.id}.bam"), path("${meta.id}.bam.bai"), emit: bam
 
   script:
   sort_bam = task.ext.sort_bam ?: 'true'

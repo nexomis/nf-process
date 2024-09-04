@@ -1,19 +1,11 @@
 process QUAST {
   container "staphb/quast:5.2.0"
-  // container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/quast:5.2.0--py312pl5321hc60241a_4"  // ~700MB !
-  //"staphb/quast:5.2.0-slim" 80MB instead of 362MB but seems not compatible with bam ...: 
-    //Running Reads analyzer...
-    //Compiling BWA (details are in /usr/local/lib/python3.10/dist-packages/quast_libs/bwa/make.log and make.err)
-    //[Errno 13] Permission denied: '/usr/local/lib/python3.10/dist-packages/quast_libs/bwa/make.log'
 
   label 'cpu_med'
   label 'mem_med'
   
   input:
-  tuple val(meta) , path(assembly)   // assembled scaffold (can be multiple files)
-  tuple val(meta_bam) , path(bam)    // [optionnel] sorted bam: cleanedreads on assembled scaffold (need here 'bai' ?)
-  path(ref_fa)   // [optionnel] reference genome  (can be mutliple files ?)
-  // include spades ??
+  tuple val(meta), path(assembly), path(ref_fa, stageAs: "inputs/reference.fa"), path(bam, stageAs: "inputs/aln.bam"), path(bai, stageAs: "inputs/aln.bam.bai") 
 
   output:
   tuple val(meta), path("${meta.id}/report.html", type: 'file') , emit: html
@@ -23,12 +15,18 @@ process QUAST {
 
   script:
   // quast option: --rna-finding ?  --glimmer ?  --features(gff) ? --bam ?
+
+  
+  def args_ref = ref_fa.size() > 1 ? "-r inputs/reference.fa" : ""
+  def args_bam = bam.size() > 1 ? "--bam inputs/aln.bam" : ""
+
   """
   quast.py \\
     --output-dir ${meta.id} \\
+    --labels ${meta.id} \\
     --threads $task.cpus \\
-    ${bam ? "--bam ${bam}" : ""} \\
-    ${ref_fa ? "-r ${ref_fa}" : ""} \\
+    $args_ref \\
+    $args_bam \\
     ${task.ext.args ?: ''} \\
     ${assembly.join(' ')} \\
     2> ${meta.id}.log

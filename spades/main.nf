@@ -29,7 +29,7 @@ process SPADES {
     --memory ${memory_in_gbit_min1} \\
     -o ${meta.id} \\
     ${ (reads.size() == 1) ? "-s ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
-    ${meta.spades_args ?: ''} \\
+    ${meta.args_spades ?: ''} \\
     ${task.ext.args ?: ''} \\
     2> ${meta.id}.log
 
