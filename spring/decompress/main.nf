@@ -1,6 +1,7 @@
 
 
 process SPRING_DECOMPRESS {
+
   container 'ghcr.io/nexomis/spring:1.1.1'
 
   label 'cpu_low'
@@ -13,15 +14,13 @@ process SPRING_DECOMPRESS {
   tuple val(meta), path("${meta.id}*.fq.gz", arity: 1..2)
 
   script:
+  def R1 = meta.id + "_R1.fq.gz"
+  def R2 = meta.id + "_R2.fq.gz"
+  meta.remove("read_type")
   """
   #!/usr/bin/bash
 
-  spring -d -g -t ${task.cpus} -i $spring_file -o ${meta.id}.fq.gz
-  if [[ -e ${meta.id}.fq.gz.1 && -e ${meta.id}.fq.gz.2 ]]; then
-    # Move (rename) the files
-    mv ${meta.id}.fq.gz.1 ${meta.id}_R1.fq.gz
-    mv ${meta.id}.fq.gz.2 ${meta.id}_R2.fq.gz
-  fi
+  spring -d -g -t ${task.cpus} -i $spring_file -o $R1 $R2
   """
 
   stub:
