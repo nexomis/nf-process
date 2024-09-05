@@ -17,7 +17,7 @@ process SPRING_COMPRESS {
   #!/usr/bin/bash
 
   spring -q ${params.quality_mode} -t ${task.cpus} -c -i ${files} -o ${meta.id}.spring \\
-    ${task.ext.args ?: ''} \\
+    ${task.ext.args ? task.ext.args : ''} \\
     ${(files[0].getExtension() in gz_extensions) ? '-g' : ''}
   """
 
