@@ -6,7 +6,7 @@ process ABACAS {
 
   input:
   tuple val(meta), path(scaffolds, arity: 1, stageAs: 'input_scaffolds.fa')
-  path (ref_genome, arity: 1, stageAs: 'input_ref.fa')
+  tuple val(meta2), path (ref_genome, arity: 1, stageAs: 'input_ref.fa')
 
   output:
   tuple val(meta), path("${meta.id}.abacas.fasta", type: 'file')

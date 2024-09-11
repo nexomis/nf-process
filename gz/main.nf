@@ -1,7 +1,7 @@
 process GZ {
   container 'quay.io/biocontainers/pigz:2.8'
 
-  label 'cpu_med'
+  label 'cpu_low'
   label 'mem_2G_per_cpu'
   
   input:

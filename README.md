@@ -1,87 +1,218 @@
 # Contribution Rules and Conventions: PROCESS
 
-## 0. Structure
-To ensure maximum portability, processes should preferably accomplish single tasks (within reason, for example: `samtools`: `converts`, `sort`, and `index`, or `sam2bam` in an alignment process with `bowtie2`).
-Each process should be in an individual file located in a directory named after the tool, a subdirectory named after the analysis step (if relevant), and, if necessary, a subdirectory for specific adaptations (e.g., different versions or Docker containers, different argument considerations, etc.).
+Objectives:
 
-## 1. Handling Input and Output File Paths
+- Ensure consistency and best practices in process definitions
+- Facilitate maintainability and readability of Nextflow processes
+- Promote efficient and reproducible pipeline development
 
-### 1.1 Input path
-Specify the existing state and arity of the input paths. Use the `saveAs` operator to avoid conflicts with process output files. 
+## 0. Project Structure
 
-### 1.2 No paths in `meta`
-Metadata (`meta`) should not contain file paths; it's better to declare them as `path` from the outset.
+- Each process should accomplish a single task or a closely related set of tasks.
 
-## 2. File Handling
+- Store processes in individual files nmaed `main.nf` within a directory structure that reflects the tool and analysis step.
 
-### 2.1 `mv`/`rename`
-Never use `mv` or equivalent: it can produce strange behaviors in S3, especially with large files.
+- Use clear, descriptive names for processes
+  - Use lower_snake_case for directory holding the process script `main.nf`
+  - Optionally use sub-directory for tools with subcommand such as `kraken2` (`index` vs `classify`)
+  - following `UPPER_SNAKE_CASE` convention for process name in `main.nf` (e.g., `FASTP`, `KRAKEN2`).
 
-### 2.2 `cp`
-Minimize copying (`cp`), especially for large files. To place all outputs of a tool in a specific directory when the tool necessarily generates output in the current directory, you can create the folder and move into it before running the tool.
+Example structure:
+```
+process/
+  fastp/
+    main.nf
+  kraken2/
+    main.nf
+    build/
+      main.nf
+  spades/
+    main.nf
+```
 
-### 2.3 If usage of `mv`/`cp` is recquired
-Should there be cases where the use of `mv`/`cp` is unavoidable on large files, in order to make these worflows usable on the cloud, we will activate `scratch` for the process concerned.
+Example `main.nf`:
+```
+process FASTP {
+  ...
+}
+```
 
-## 3. Handling Paths as Queue Channels
-When paths in queue channels **is necessarily** depend on a sample (or more globally on a featires), channels should be passed and retrieved as tuples: `val(meta), path(file/dir)`.
-This is the case, for example, for reads path for analyses at sample level or for genome path on worflows whose aim is to create index.
+## 1. Input and Output Handling
 
-### 3.2 Structure of Queue Channels for Paths (input **and** output)
-- The first element of these queue channels should be a map named `meta`, which includes at least a unique identifier (`meta.id`).
-- The second element is a list of associated file paths.
-- Ideally, the format is limited to what has been described (`val(meta), path(file/dir)`), and if multiple paths are needed for the same task (e.g., reads and a reference genome), they can be provided to the process as two distinct input queue channels that follow the described format and are ordered in the same sequence based on their common `meta.id`.
-**In some cases, it might be necessary to add additional elements, which is allowed**, (e.g `val(meta), [path(reads_R1, reads_R2)], [kraken_db], [genome_fasta, genome_index]`)
+### 1.1 Input declaration
 
-### 3.3 Specific Attributes
+- Use `tuple val(meta), path(...)` only for sample-specific inputs.
+- Specify input `arity` and use `stageAs` to avoid conflicts.
 
-#### 3.3.1 Reads
-- `meta.read_type` should be defined, with possible values: `spring`, `SR`, or `PE`.
-- Other attributes may be useful, and if needed, they should follow these conventions:
+Example: 
+```
+  input:
+  tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
+```
+
+- When comparing to a reference or database, separate inputs shall not use the same `meta`.
+Example:
+```
+  input:
+  tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
+  tuple val(meta2), path(index, arity: 1, stageAs: 'input_ref/*')
+```
+
+### 1.2 output declaration
+
+- Use `tuple val(meta), path(...)` for sample-specific outputs.
+- Include, if possible, `meta.id` in file names or file path to facilitate sample to file association.
+- Do not rename or move files to change its name as it's not compatible with S3-based storage.
+- When possible and for big files, choose a compressed format output. 
+
+Example: 
+```
+output:
+tuple val(meta), path("${meta.id}*.fq.gz", arity: 1..2), emit: reads
+tuple val(meta), path("${meta.id}.json", arity: 1), emit: report
+```
+
+- Files with index are defined as flatten with meta: 
+
+Example:
+```
+  output:
+  tuple val(meta), path("${meta.id}.bam"), path("${meta.id}.bam.bai"), emit: bam
+```
+
+## 2. Metadata map `meta`
+
+- Use meta map for sample-specific information.
+- Include at least meta.id as a unique identifier.
+
+### 2.1 Attributes names by convention
+
+- `meta.read_type`:
+  - `SR` for single-read
+  - `PE` for pair-end 
+  - `LR` for long-read 
+  - `spring` for compressed SR or PE  
+
+- `meta.strand`: Type of stranded library for RNA-Seq
+
+- `meta.ref_id`: Reference identifier.
+
+- `meta.args_{{tool}}`: Tool/process-specific arguments.
   - `meta.strand` - in kallisto format: fr-stranded, rf-stranded, or unstranded.
   - `meta.is_3prime` - boolean relative to library prep (false assumes 'full_length' sequencing. Note: '5prime' libraries are not yet supported).
   - `meta.frag_size` and `meta.frag_size_sd` - float relative to mean/sd fragment size.
 
-Note: When appropriate and not detrimental to the process, it is preferable to provide one file per pair of reads (rather than files per lane or interleaved, for example) with file name suffixes '_1'/'_2' or '_R1'/'_R2'.
 
-## 4. Arguments and Argument Management
+### 2.2 To avoid with `meta`
 
-### 4.1 Default Arguments
-The default values of arguments used in the processes should be defined at the process level and not upstream in the workflow (e.g., `fastp` process:  `fastp --thread $task.cpus ${task.ext.args ?: default_args} \\` https://github.com/nexomis/nf-process/blob/fc42479b5bc0e1bc3631c3446d47b4f068df554b/fastp/main.nf).
+- Do not embed file in meta.
+- Only meta.id should be mandatory in process definitions; other attributes should have fallbacks.
 
-### 4.2 Sample-Specific Arguments
-For sample-specific arguments defined by elements external to the process (e.g., defined by the user in the sample sheet), the arguments will be stored in `meta` according to two possible options: `meta.args` or `meta.args_<toolsName>`.
-In any case, all processes should still function if `meta.args` or `meta.args_<toolsName>` are not defined, by providing default values in the process if necessary.
-Note: For sample-specific arguments that can be defined within the process, continue to handle this case within the process (e.g., SPAdes input reads: `(reads.size() == 1) ? "-s ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}"`).
+## 3 Script & command line
 
-#### 4.2.1 `meta.args`
-This needs to be updated before calling each subworkflow or process, otherwise, it could lead to execution errors or, worse, incorrect executions (ensure to set it to `null` if nothing is to be added because by default, processes may include `${meta.args ?: ''}` in their command lines).
+### 3.1 Pipeline-specific arguments
 
-#### 4.2.2 `meta.args_<toolsName>`
-Be cautious if the same tool (e.g., `samtools`, `kraken2`, ...) is used multiple times in the workflow.
+- Define default arguments within the process.
+- Use `task.ext.args` for user-overridable parameters.
+- Provide fallback to empty string or defaults
 
-## 5. Structure and Portability of Processes
+Example:
+```
+  script:
+  def default_args = "--trim_poly_g --cut_right"
+  """
+  fastp --thread $task.cpus ${task.ext.args ?: default_args} \\
+    --json ${meta.id}.json \\
+    $in_args $out_args
+```
 
-### 5.1 Stub Category
-All processes must have a `stub` category that at least creates the necessary elements for a standard workflow.
+### 3.2 Sample-Specific Arguments
 
-### 5.2 Process Portability
-The logic of whether or not a process should be executed must be defined at the workflow level, not within the processes themselves. Therefore, unless in exceptional cases, avoid using `when` blocks in processes.
+- Use `meta.args_{{tool}}` for sample-specific arguments.
+- Provide fallbacks for when these are not defined.
 
-### 5.3 Maximizing Outputs
-Maximize outputs (reasonably) and group them only if it is relevant (e.g., `samtools` process for `convert`, `sort`, and `index`, group `bam`/`bai` but not `raw_bam` and `sorted_bam`).
+Example:
+```
+  spades.py --threads ${task.cpus} \\
+    -o ${meta.id} \\
+    ${meta.args_spades ?: ''} \\
+    ${task.ext.args ?: ''} \\
+```
 
-### 5.4 Centralizing Publications
-To easily adapt (without multiplying module versions) the publication of processes and subworkflows (not the case for workflows) specifically to each workflow, centralize publication operations in the `conf/publish.conf` file.
-Note: To target a specific call of a process or subworkflow, they must be imported with a unique name. In all cases, a process (or subworkflow) cannot be called twice with the same name.
+### 3.3 Command
 
-## 6. Resource Management
+- Avoid capturing `stderr` and `stdout` unless necessary for output generation.
+- Keep complex Groovy logic separate from the bash script.
 
-### 6.1 Tags and Labels
-It is recommended to tag processes with labels that control at least the number of CPUs and memory allocated to tasks. Labels can be found in `modules/config/process/labels.config` and can be updated if necessary.
+## 4. Ressource management
 
-### 6.2 Adaptive Resource Allocation
-When it is necessary to access task resources within the process (e.g., specify the number of threads or memory in a tool's execution command line), these resources should be accessed via `task.mem`, `task.ncpu`, etc.
+- Specify CPU and memory requirements when needed using labels such as cpu_med, mem_8G.
+- see https://github.com/nexomis/nf-config/blob/main/process/labels.config
+- Override default requirements through pipeline-specific configuration if necessary.
 
-## Typography
-See [interest section on global rules](https://github.com/nexomis/nf-template/blob/main/CONTRIBUTE.md#typography)
+Example:
+```
+  label 'cpu_med'
+  label 'mem_8G'
+  script:
+  def memory_in_mb = task.memory.toMega()
+  """
+  fastqc --threads \$task.cpus --memory \$memory_in_mb \$reads
+  """
+```
+
+## 5. Containerization
+
+- Specify container images with version-specific tags for reproducibility.
+- Prefer lightweight containers, and consider creating new images if necessary.
+- Use `params.biocontainers_registry` to define the biocontainer registry (aws or quay.io) with a fallback
+
+Example:
+```
+  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/kallisto:0.50.1--h6de1650_2"
+```
+
+## 6. Misc
+
+- Provide as many relevant outputs as possible.
+- Avoid Internal Logic, keep process execution logic in the workflow, not within the process.
+- Dot not define publishDir directive at the process level. It needs to be defined at the pipeline level.
+- Include stubs for workflow developments.
+
+### 6.1 Documentation
+
+- Provide brief descriptions of process purpose, inputs, and outputs in comments.
+- Document any non-obvious behavior or requirements
+
+### 6.2 Global rules and patterns
+
+- Take in account the global rules defined here: https://github.com/nexomis/nf-template/blob/main/CONTRIBUTE.md#typography
+- Use empty files to manage optional inputs.
+
+Example: 
+```
+process QUAST {
+  ...
+  input:
+  tuple val(meta), path(assembly, stageAs: "inputs/assembly.fa")
+  tuple val(meta2), path(ref_fa, stageAs: "inputs/reference.fa")
+  tuple val(meta3), path(bam, stageAs: "inputs/aln.bam"), path(bai, stageAs: "inputs/aln.bam.bai") 
+  ...
+  script:
+  def args_ref = ref_fa.size() > 1 ? "-r inputs/reference.fa" : ""
+  def args_bam = bam.size() > 1 ? "--bam inputs/aln.bam" : ""
+  """
+  quast.py \\
+    --output-dir ${meta.id} \\
+    --labels ${meta.id} \\
+    --threads $task.cpus \\
+    $args_ref \\
+    $args_bam \\
+    ${task.ext.args ?: ''} \\
+    $assembly \\
+    2> ${meta.id}.log
+  """
+}
+
+```
+

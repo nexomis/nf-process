@@ -5,6 +5,7 @@ process SPADES {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/spades:4.0.0--h5fb382e_2"
 
   label 'cpu_high'
+  label 'mem_high'
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')

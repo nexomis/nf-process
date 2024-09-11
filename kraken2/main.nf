@@ -6,7 +6,7 @@ process KRAKEN2 {
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
-  path db
+  tuple val(meta2), path(db, stageAs: "inputs/index")
 
   output:
   tuple val(meta), path("*classified*")       , optional:true, emit: classified_reads_fastq
