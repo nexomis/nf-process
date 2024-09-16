@@ -5,7 +5,7 @@ process EMPTY_FILE {
   label 'mem_low'
 
   output:
-  path "EMPTY_FILE"
+  tuple val({[id:"empty_file"]}), path("EMPTY_FILE")
 
   script:
   """

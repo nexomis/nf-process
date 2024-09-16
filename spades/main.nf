@@ -11,12 +11,9 @@ process SPADES {
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
   
   output:
-  tuple val(meta), path("${meta.id}/scaffolds.fasta", type: 'file')                   , optional:true , emit: scaffolds
-  tuple val(meta), path("${meta.id}/contigs.fasta", type: 'file')                     , optional:true , emit: contigs
+  tuple val(meta), path("${meta.id}/*scaffolds.fasta", type: 'file')                  , emit: scaffolds
+  tuple val(meta), path("${meta.id}/*contigs.fasta", type: 'file')                    , emit: contigs
   tuple val(meta), path("${meta.id}/assembly_graph_with_scaffolds.gfa", type: 'file') , optional:true , emit: gfa
-  tuple val(meta), path("${meta.id}/spades.log", type: 'file')                        , optional:false, emit: log_tools
-  tuple val(meta), path("${meta.id}.log", type: 'file')                               , optional:false, emit: log
-  //!!! tuple val(meta), path("${meta.id}", type: 'dir')                              , optional:false, emit: output_dir  // usefull ?
 
   script:
   def memory_in_gbit = MemoryUnit.of("${task.memory}").toUnit('GB') * 8
@@ -31,14 +28,16 @@ process SPADES {
     -o ${meta.id} \\
     ${ (reads.size() == 1) ? "-s ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
     ${meta.args_spades ?: ''} \\
-    ${task.ext.args ?: ''} \\
-    2> ${meta.id}.log
+    ${task.ext.args ?: ''}
 
-  # Select output files :
-  mkdir ${meta.id}
-  if [ ! -f ${meta.id}/scaffolds.fasta ]; then
-    echo "WARNING : scaffolds file not generated: use contigs of raw_contigs instead ?? (and contigs.gfa instead of scaffolds.gfa)"
+  if [ -f "${meta.id}/scaffolds.fasta" ] && [ -f "${meta.id}/raw_scaffolds.fasta" ]; then
+    rm "${meta.id}/raw_scaffolds.fasta"
   fi
+
+  if [ -f "${meta.id}/contigs.fasta" ] && [ -f "${meta.id}/raw_contigs.fasta" ]; then
+    rm "${meta.id}/raw_contigs.fasta"
+  fi
+  
   """
 
   stub:
