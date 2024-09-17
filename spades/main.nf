@@ -2,7 +2,7 @@
 // (even if compatible with the 'spades' tool, cases with several independent input files are not handled here, this inclued additional librarie or hybrid approach).
 
 process SPADES {
-  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/spades:4.0.0--h5fb382e_2"
+  container "quay.io/nexomis/spades:4.0.0-91e677"
 
   label 'cpu_high'
   label 'mem_high'
@@ -37,7 +37,15 @@ process SPADES {
   if [ -f "${meta.id}/contigs.fasta" ] && [ -f "${meta.id}/raw_contigs.fasta" ]; then
     rm "${meta.id}/raw_contigs.fasta"
   fi
-  
+
+  if [ ! -f "${meta.id}/raw_scaffolds.fasta" ] && [ ! -f "${meta.id}/scaffolds.fasta" ]; then
+    if [ -f "${meta.id}/contigs.fasta" ]; then
+      cp "${meta.id}/contigs.fasta" "${meta.id}/scaffolds.fasta"
+    elif [ -f "${meta.id}/raw_contigs.fasta" ]; then
+      cp "${meta.id}/raw_contigs.fasta" "${meta.id}/scaffolds.fasta"
+    fi
+  fi
+
   """
 
   stub:
