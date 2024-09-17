@@ -10,9 +10,9 @@ process QUAST {
   tuple val(meta3), path(bam, stageAs: "inputs/aln??.bam"), path(bai, stageAs: "inputs/aln??.bai") 
 
   output:
-  tuple val(meta), path("${meta.id}/report.html", type: 'file') , emit: html
-  tuple val(meta), path("${meta.id}/report.tsv", type: 'file')  , emit: tsv
-  tuple val(meta), path("${meta.id}", type: 'dir')              , emit: dir
+  tuple val(meta), path("${meta.sample_id ? meta.sample_id : meta.id}/report.html", type: 'file') , emit: html
+  tuple val(meta), path("${meta.sample_id ? meta.sample_id : meta.id}/report.tsv", type: 'file')  , emit: tsv
+  tuple val(meta), path("${meta.sample_id ? meta.sample_id : meta.id}", type: 'dir')              , emit: dir
 
   script:
   def args_ref = ref_fa.size() > 1 ? "-r $ref_fa" : ""
@@ -29,10 +29,10 @@ process QUAST {
     }
   }
   if (bam_not_empty) {args_bam = "--bam " + bamList.join(',')}
-  
+  def out_dir = meta.sample_id ? meta.sample_id : meta.id
   """
   quast.py \\
-    --output-dir ${meta.id} \\
+    --output-dir $out_dir \\
     --labels ${meta.id} \\
     --threads $task.cpus \\
     $args_ref \\
@@ -42,9 +42,10 @@ process QUAST {
   """
 
   stub:
+  def out_dir = meta.sample_id ? meta.sample_id : meta.id
   """
   #!/usr/bin/bash
-  mkdir ${meta.id}
-  touch ${meta.id}.log ${meta.id}/report.html ${meta.id}/report.tsv ${meta.id}/report.tex ${meta.id}/icarus.html ${meta.id}/report.pdf 
+  mkdir $out_dir
+  touch $out_dir.log $out_dir/report.html $out_dir/report.tsv $out_dir/report.tex $out_dir/icarus.html ${meta.id}/report.pdf 
   """
 }
