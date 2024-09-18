@@ -16,19 +16,28 @@ process SPADES {
   tuple val(meta), path("${meta.label ?: meta.id}/assembly_graph_with_scaffolds.gfa", type: 'file') , optional:true , emit: gfa
 
   script:
-  def memory_in_gbit = MemoryUnit.of("${task.memory}").toUnit('GB') * 8
-  def memory_in_gbit_min1 = Math.max(memory_in_gbit, 1)
   def out_dir = meta.label ?: meta.id
+  def all_args = (task.ext.args ?: '') + " " + (meta.args_spades ?: '')
+  if (all_args == " "){
+    all_args=""
+  }
+  all_args = all_args.replaceAll("  ", " ")
+  def args_list = all_args.tokenize(' ')
+  args_list = args_list.unique()
+  def containsMeta = args_list.any { (it.startsWith('--meta')) || (it == "--corona") || (it == "--rnaviral")}
+  if (containsMeta) { args_list = args_list.findAll { it != '--careful' } }
+  def processed_args = args_list.join(" ")
   """
   #!/usr/bin/bash
+
+  set -e
   
   # run SPAdes : spadesMode (rnaviral) on meta.spades_args (not on task.ext.args) ?
   spades.py --threads ${task.cpus} \\
-    --memory ${memory_in_gbit_min1} \\
+    --memory ${task.memory.toGiga()} \\
     -o ${out_dir} \\
     ${ (reads.size() == 1) ? "-s ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
-    ${meta.args_spades ?: ''} \\
-    ${task.ext.args ?: ''}
+    $processed_args
 
   if [ -f "${out_dir}/scaffolds.fasta" ] && [ -f "${out_dir}/raw_scaffolds.fasta" ]; then
     rm "${out_dir}/raw_scaffolds.fasta"
