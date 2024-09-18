@@ -9,7 +9,7 @@ process ABACAS {
   tuple val(meta2), path (ref_genome, arity: 1, stageAs: 'input_ref.fa')
 
   output:
-  tuple val(meta), path("${meta.id}.abacas.fasta", type: 'file')
+  tuple val(meta), path("${meta.label ?: meta.id}.fasta", type: 'file')
 
   script:
   // useful to redefine the default mummer_program value (already defined in nextflow.config)?
@@ -20,7 +20,7 @@ process ABACAS {
 
   abacas.pl -r ${ref_genome} \\
     -q ${scaffolds} \\
-    -o ${meta.id}.abacas \\
+    -o ${meta.label ?: meta.id} \\
     ${task.ext.args ?: '-p nucmer'}
 
   """
@@ -28,7 +28,6 @@ process ABACAS {
   stub:
   """
   #!/usr/bin/bash
-  mkdir ${meta.id}
-  touch ${meta.id}.log ${meta.id}/${meta.id}.fasta ${meta.id}/${meta.id}.tab ${meta.id}/nucmer.tiling ${meta.id}/${meta.id}.bin ${meta.id}/${meta.id}.gaps ${meta.id}/nucmer.delta ${meta.id}/${meta.id}.crunch ${meta.id}/${meta.id}.gaps.tab ${meta.id}/nucmer.filtered.delta ${meta.id}/unused_contigs.out
+  touch ${meta.label ?: meta.id}.fasta
   """
 }

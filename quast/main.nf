@@ -10,9 +10,9 @@ process QUAST {
   tuple val(meta3), path(bam, stageAs: "inputs/aln??.bam"), path(bai, stageAs: "inputs/aln??.bai") 
 
   output:
-  tuple val(meta), path("${meta.sample_id ? meta.sample_id : meta.id}/report.html", type: 'file') , emit: html
-  tuple val(meta), path("${meta.sample_id ? meta.sample_id : meta.id}/report.tsv", type: 'file')  , emit: tsv
-  tuple val(meta), path("${meta.sample_id ? meta.sample_id : meta.id}", type: 'dir')              , emit: dir
+  tuple val(meta), path("${meta.label ?: meta.id}/report.html", type: 'file') , emit: html
+  tuple val(meta), path("${meta.label ?: meta.id}/report.tsv", type: 'file')  , emit: tsv
+  tuple val(meta), path("${meta.label ?: meta.id}", type: 'dir')              , emit: dir
 
   script:
   def args_ref = ref_fa.size() > 1 ? "-r $ref_fa" : ""
@@ -29,7 +29,7 @@ process QUAST {
     }
   }
   if (bam_not_empty) {args_bam = "--bam " + bamList.join(',')}
-  def out_dir = meta.sample_id ? meta.sample_id : meta.id
+  def out_dir = (meta.label ?: meta.id)
   """
   quast.py \\
     --output-dir $out_dir \\

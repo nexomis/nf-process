@@ -3,7 +3,7 @@ process BOWTIE2_BUILD {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/bowtie2:2.5.4--he20e202_3"
 
   label 'cpu_high'
-  label 'mem_8G'
+  label 'mem_8G' // 4GB max of foot print: https://hpc.nih.gov/apps/bowtie2.html
 
   input:
   tuple val(meta), path(fasta, arity: 1, stageAs: 'input_raw/*')
@@ -22,7 +22,7 @@ process BOWTIE2_BUILD {
   bowtie2-build --threads $task.cpus \\
     ${task.ext.args ?: ''} \\
     $fasta \\
-    ${meta.id}/${meta.id} \\
+    ${meta.id}/index \\
     2>${meta.id}.log
   """
 
