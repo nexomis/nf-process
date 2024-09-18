@@ -11,9 +11,8 @@ process SPADES {
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
   
   output:
-  tuple val(meta), path("${meta.label ?: meta.id}/*scaffolds.fasta", type: 'file')                  , emit: scaffolds
-  tuple val(meta), path("${meta.label ?: meta.id}/*contigs.fasta", type: 'file')                    , emit: contigs
-  tuple val(meta), path("${meta.label ?: meta.id}/assembly_graph_with_scaffolds.gfa", type: 'file') , optional:true , emit: gfa
+  tuple val(meta), path("${meta.label ?: meta.id}/*scaffolds.fasta", type: 'file')  , emit: scaffolds
+  tuple val(meta), path("${meta.label ?: meta.id}/*contigs.fasta", type: 'file')    , emit: contigs
 
   script:
   def out_dir = meta.label ?: meta.id
@@ -32,7 +31,6 @@ process SPADES {
 
   set -e
   
-  # run SPAdes : spadesMode (rnaviral) on meta.spades_args (not on task.ext.args) ?
   spades.py --threads ${task.cpus} \\
     --memory ${task.memory.toGiga()} \\
     -o ${out_dir} \\
@@ -52,6 +50,9 @@ process SPADES {
       cp "${out_dir}/contigs.fasta" "${out_dir}/scaffolds.fasta"
     elif [ -f "${out_dir}/raw_contigs.fasta" ]; then
       cp "${out_dir}/raw_contigs.fasta" "${out_dir}/scaffolds.fasta"
+    else
+      touch ${out_dir}/contigs.fasta
+      touch ${out_dir}/scaffolds.fasta
     fi
   fi
 
