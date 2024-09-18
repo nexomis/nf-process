@@ -16,12 +16,30 @@ process ABACAS {
   """
   #!/usr/bin/bash
 
-  # run ABACAS (TODO, check interest of option: -N  |  -g  |  -P ?  |  -f ?  | -t (tblastx)?)
+  awk '/^>/{filename="input_ref_" ++i ".fa"} {print \$0 > filename}' input_ref.fa
 
-  abacas.pl -r ${ref_genome} \\
-    -q ${scaffolds} \\
-    -o ${meta.label ?: meta.id} \\
-    ${task.ext.args ?: '-p nucmer'}
+  for ref_file in input_ref_*.fa; do
+    index=\${ref_file#input_ref_}
+    index=\${index%.fa}
+    output_prefix="${meta.label ?: meta.id}_\$index"
+
+    abacas.pl -r \$ref_file \\
+      -q ${scaffolds} \\
+      -o "\$output_prefix" \\
+      ${task.ext.args ?: '-p nucmer'}
+
+    output_fa="\${output_prefix}.fasta"
+
+    if [ -f "\$output_fa" ]; then
+      char_count=\$(head -n 100 "\$output_fa" | grep -v '^>' | tr -d '\n' | wc -c)
+      if [ "\$char_count" -le 100 ]; then
+        rm "\$output_fa"
+      fi
+    fi
+  done
+
+  touch ${meta.label ?: meta.id}_0.fasta
+  cat ${meta.label ?: meta.id}_*.fasta > ${meta.label ?: meta.id}.fasta
 
   """
 
