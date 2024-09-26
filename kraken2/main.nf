@@ -9,11 +9,11 @@ process KRAKEN2 {
   tuple val(meta2), path(db, stageAs: "inputs/index")
 
   output:
-  tuple val(meta), path("*classified*")       , optional:true, emit: classified_reads_fastq
-  tuple val(meta), path("*unclassified*")     , optional:true, emit: unclassified_reads_fastq
+  tuple val(meta), path("*classified*")        , optional:true, emit: classified_reads_fastq
+  tuple val(meta), path("*unclassified*")      , optional:true, emit: unclassified_reads_fastq
   tuple val(meta), path("*classifiedreads.txt"), optional:true, emit: classified_reads_assignment
-  tuple val(meta), path("*.report.txt")        , emit: report
-  tuple val(meta), path("*.output.txt")        , emit: output
+  tuple val(meta), path("*.txt")               , emit: report
+  tuple val(meta), path("*.gz")            , emit: output
 
   // modify ext from config to enable classified and unclassified
   // ext:
@@ -25,11 +25,12 @@ process KRAKEN2 {
   #!/usr/bin/bash
 
   kraken2 --thread $task.cpus \\
-  --output ${meta.id}.output.txt --report ${meta.id}.report.txt \\
+  --report ${meta.id}.report.txt \\
   --db $db \\
   ${(reads.size() === 2)? '--paired': ''} \\
   ${task.ext.args ?: ''} \\
-  $reads
+  $reads \\
+  | gzip > ${meta.id}.gz
   
   ec=\$?
 
