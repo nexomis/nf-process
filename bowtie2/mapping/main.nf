@@ -7,7 +7,7 @@ process BOWTIE2 {
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
-  path(idx, arity: 1, stageAs: 'input_ref/*')
+  tuple val(meta2), path(idx, arity: 1, stageAs: 'input_ref/*')
 
   output:
   tuple val(meta), path("${meta.id}.sam") , emit: sam
