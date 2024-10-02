@@ -39,32 +39,34 @@ process IVAR_VARIANTS_ALL_POS {
   ## complete tsv result with unvariable position by adding of coverage and RefNucl
 
   # recup coverage and RefNucl. TODO: recup 
-  nbCol = \$(awk -F'\t' 'NR==1 { print NF }' ${meta.id}_raw.tsv)
-  awk -F '\t' -v nbCol="\$nbCol" '{
-    printf \$1"\t"\$2"\t"\$3"\tNA\t"\$4"\tNA\tNA\tNA\tNA\tNA\t0\t"\$4; 
+  nbCol=\$(awk -F'\\t' 'NR==1 { print NF }' ${meta.id}_raw.tsv)
+  awk -F '\\t' -v nbCol="\$nbCol" '{
+    printf \$1"\\t"\$2"\\t"\$3"\\tNA\\t"\$4"\\tNA\\tNA\\tNA\\tNA\\tNA\\t0\\t"\$4; 
     for (i = 13; i <= nbCol; i++) {
-      printf "\tNA";
+      printf "\\tNA";
     } 
     print "";
   }' ${meta.id}.mpileup > ${meta.id}.cov
 
   # add remain line
   sed '1d' ${meta.id}_raw.tsv > ${meta.id}_tmp.tsv
-  grep -v "^\$(sed '1d' ${meta.id}_raw.tsv | cut -f1,2)" ${meta.id}.cov >> ${meta.id}_tmp.tsv  # string length may exeed bash limit!!!
+  sed '1d' ${meta.id}_raw.tsv | awk -F "\\t" '{print "^"\$1"\\t"\$2"\\t"}' > ${meta.id}_pattern_ivarPos.txt
+  grep -v -f ${meta.id}_pattern_ivarPos.txt ${meta.id}.cov >> ${meta.id}_tmp.tsv    ## grep about big file with regex search => take too much time than necessary! better with awk (or need to use pandas, so out of ivar container) ?
   head -n1 ${meta.id}_raw.tsv > ${meta.id}.tsv
   sort -k1,1 -k2,2n -k8r,8n -s ${meta.id}_tmp.tsv >> ${meta.id}.tsv
-  rm ${meta.id}_tmp.tsv
+  rm ${meta.id}_tmp.tsv ${meta.id}_pattern_ivarPos.txt
 
   ## Filter iSNVs: (Note: in case of sample anlysed individually (not in batch context), this is the real results).
-  awk -F '\t' \\
-    -v minDepth='${task.ext.args3 ?: '30'}' \\
-    -v maxRefDepth='${task.ext.args4 ?: '0.8'}' '{
+  awk -F '\\t' \\
+    -v minDepth='${task.ext.args3 ?: "30"}' \\
+    -v maxRefDepth='${task.ext.args4 ?: "0.8"}' '
+    NR == 1 { print \$0; next; } {
     if (\$12 >= minDepth && \$5/\$12 < maxRefDepth) 
       print \$0
     }' ${meta.id}_raw.tsv > ${meta.id}_filter.tsv
 
   ## Pos with iSNVs
-  cut -f1,2 ${meta.id}_filter.tsv > ${meta.id}_iSNVpos.txt
+  sed '1d' ${meta.id}_filter.tsv | cut -f1,2 > ${meta.id}_iSNVpos.txt
   
   """
 
