@@ -1,6 +1,7 @@
 process TRANSFERT_GFF {
   container "python3.12-biopython"  // 340MiB - test from slim-3.12
-  //container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/biopython:1.70--np112py35_0"   // 220 MiB !!
+  //container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/biopython:1.70--np112py36_0"   // 220 MiB !!
+  // pegi3s/biopython:1.78 (python 3.8.10 ...)
 
   input:
   tuple val(meta), path(sample_fa, arity: 1, stageAs: 'input/')  // 'stageAs' and templates ?

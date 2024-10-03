@@ -1,27 +1,20 @@
 #!/usr/bin/env python3
 
-
+import sys
 from Bio import SeqIO
 from Bio import Align
 from collections import OrderedDict
 import csv
-
-from BCBio import GFF
-from Bio.SeqFeature import FeatureLocation
-import subprocess
-import sys
+import os
 import hashlib
 from datetime import datetime
-import os
-import tempfile
-
 
 
 
 def get_ref2alt(ref_file, alt_file, out_prefix, save_psa):
-    ##### pairwise alignement: only coord (no mutation)
-    #        - for now, not manage multifasta input and need thas all sequence are in same strand
-    #          (add validation following minimal identity between sequences or stop !)
+    ### pairwise alignment: coord only (no mutation)
+    ## currently doesn't handle multifasta entries and needs all sequences to be on the same strand!
+    ## TODO: add validation os psa with minimum identity between sequences or quit!
 
     aligner = Align.PairwiseAligner()
     aligner.mode = "global"
@@ -33,7 +26,7 @@ def get_ref2alt(ref_file, alt_file, out_prefix, save_psa):
     aligner.query_end_gap_score = -10
 
     coords_refGnm2smplGnm = {}
-    
+
     parsed_records = dict()
     parsed_records["ref"] = list(SeqIO.parse(ref_file, "fasta"))
     parsed_records["alt"] = list(SeqIO.parse(alt_file, "fasta"))
@@ -54,7 +47,7 @@ def get_ref2alt(ref_file, alt_file, out_prefix, save_psa):
     alignment_array = best.__array__()
     ref = "".join(map(lambda x: x.decode("utf-8"), alignment_array[0]))
     alt = "".join(map(lambda x: x.decode("utf-8"), alignment_array[1]))
-    
+
     if ref_id not in coords_refGnm2smplGnm:
         coords_refGnm2smplGnm[ref_id] = OrderedDict()
     # base1
@@ -91,7 +84,7 @@ def get_ref2alt(ref_file, alt_file, out_prefix, save_psa):
                     'smplChr': smpl_chr,
                     'smplPos': smpl_pos
                 })
-    
+
     if save_psa:
         alignment_file = out_prefix + "_" + ref_id + "_vs_" + alt_id + "_globalAlgn.txt"
         with open(alignment_file, 'w') as f_align:
@@ -107,88 +100,96 @@ def transform_individual_coordinate(ref_chr, ref_pos, coords_dict):
     return None, None
 
 
-### coords_refGnm2smplGnm: base1
-### gff3: base1, start AND end inclusive
-### BCBio.GFF: base0, start incluve but end exclusive 
-### gff3.start = BCBio.GFF.start + 1 (base0 -> base1) | gff3.end = [BCBio.GFF.end + 1 (base0 -> base1) -1 (exlusive -> inclusive)]] = BCBio.GFF.end
 def transform_gff(input_gff, coords_refGnm2smplGnm, out_prefix, include_metada_in_gff):
-    with open(input_gff) as f_in_gff:
-        gff_records = list(GFF.parse(f_in_gff))
+    with open(input_gff, 'r') as f_in_gff:
+        lines = f_in_gff.readlines()
 
-    for record in gff_records:  # one record by chr
-        smpl_chr = None
-        for feature in record.features:
-            #print(f"\\n>> record.id: '{record.id}' | feature.location.start+1: '{feature.location.start+1}' | feature.location.end: '{feature.location.end}'")
-            smpl_chr_start, smpl_pos_start = transform_individual_coordinate(record.id, feature.location.start+1, coords_refGnm2smplGnm)
-            smpl_chr_end, smpl_pos_end = transform_individual_coordinate(record.id, feature.location.end, coords_refGnm2smplGnm)
-            #print(f"<<smpl_chr_start: '{smpl_chr_start}' | smpl_chr_end '{smpl_chr_end}' | smpl_pos_start '{smpl_pos_start}' | smpl_pos_end '{smpl_pos_end}'")
-            if not (smpl_chr_start and smpl_chr_end and smpl_pos_start and smpl_pos_end):
-                print(f"Error: no correspondance finding for feature location ('{feature}')")
-                sys.exit(1)
-            elif smpl_chr_start != smpl_chr_end:
-                print(f"Error: multiple chromosome for feature (smpl_chr_start != smpl_chr_end: '{feature}')")
-                sys.exit(1)
-            else:
-                if smpl_chr is None:
-                    smpl_chr = smpl_chr_start
-                elif smpl_chr != smpl_chr_start:
-                    print(f"Error: multiple sample chromosome for one reference chromosome, not excepted for global alignment and recquire to check compatibility with gff transfer ('{record.id}' assigned to '{smpl_chr}' and to '{smpl_chr_start}')")
-                    sys.exit(1)
-                feature.location = FeatureLocation(smpl_pos_start, smpl_pos_end, feature.location.strand)
-        record.id = smpl_chr
-                
-    # write output including metadata in case of 'include_metada_in_gff' True
-    out_gff_file = out_prefix + "_transferedAnnotation.gff"
-    if not include_metada_in_gff:
-        with open(out_gff_file, "w") as f_out_gff:
-            GFF.write(gff_records, f_out_gff)
-    else:
-        # tmpfile with raw out_gff without script metadata
-        with tempfile.NamedTemporaryFile(delete=False, mode="w+") as temp_gff:
-            GFF.write(gff_records, temp_gff)
-            temp_gff_path = temp_gff.name
-            
-        with open(out_gff_file, "w") as f_out_gff:
-            with open(temp_gff_path, "r") as temp_gff:
-                # write metadata natively on temp_gff file
-                while True:
-                    line = temp_gff.readline()
-                    if not line.startswith("#") or line.startswith("##sequence-region"):
-                        break
-                    f_out_gff.write(line)
-                    
-                # add metadata of script execution
-                hash_md5 = hashlib.md5()
-                with open(input_gff, "rb") as f:
-                    for chunk in iter(lambda: f.read(4096), b""):
-                        hash_md5.update(chunk)
-                in_gff_hash = hash_md5.hexdigest()
-                hash_md5 = hashlib.md5()
-                with open(__file__, "rb") as f:
-                    for chunk in iter(lambda: f.read(4096), b""):
-                        hash_md5.update(chunk)
-                script_hash = hash_md5.hexdigest()
-                f_out_gff.write("# This GFF file has been reconstructed by transferring annotations (based on global pairwise alignment):\\n")
-                f_out_gff.write(f"#    -from: '{os.path.abspath(input_gff)}'\\n#           [hashlib.md5_4096:'{in_gff_hash}']\\n")
-                f_out_gff.write(f"#    -by:   '{__file__}'\\n#           [hashlib.md5_4096:'{script_hash}']\\n")
-                f_out_gff.write(f"#    -on:   '{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}'\\n")
-                
-                # write the rest of temp_gff file
-                f_out_gff.write(line)
-                for line in temp_gff:
-                    f_out_gff.write(line)
-                    
-        os.remove(temp_gff_path)
+    new_gff_lines = []
+    version_line = None
 
+    # Catch gff-version line (if defined on first line of input file)
+    if lines[0].startswith("##gff-version"):
+        version_line = lines[0]
+        lines = lines[1:]
+
+    for line in lines:
+        if line.startswith("##sequence-region"):
+            parts = line.strip().split(" ")
+            if len(parts) == 4:
+                ref_chr, ref_start, ref_end = parts[1], int(parts[2]), int(parts[3])
+                smpl_chr_start, smpl_pos_start = transform_individual_coordinate(ref_chr, ref_start, coords_refGnm2smplGnm)
+                smpl_chr_end, smpl_pos_end = transform_individual_coordinate(ref_chr, ref_end, coords_refGnm2smplGnm)
+
+                if (smpl_chr_start and smpl_chr_end and smpl_pos_start and smpl_pos_end) and (smpl_chr_start == smpl_chr_end):
+                    new_sequence_region = f"##sequence-region {smpl_chr_start} {smpl_pos_start} {smpl_pos_end}\\n"
+                    new_gff_lines.append(new_sequence_region)
+                else:
+                    print(f"Warning: Could not transform coordinates for sequence-region: {line.strip()}")
+            continue
+
+        if line.startswith("#"):
+            # keeped in option?
+            continue
+
+        parts = line.strip().split('\t')
+        if len(parts) < 9:
+            print(f"Error: Non commented line with less than 9 columns: {line.strip()}")
+            sys.exit(1)
+
+        ref_chr, feature_start, feature_end = parts[0], int(parts[3]), int(parts[4])
+
+        smpl_chr_start, smpl_pos_start = transform_individual_coordinate(ref_chr, feature_start, coords_refGnm2smplGnm)
+        smpl_chr_end, smpl_pos_end = transform_individual_coordinate(ref_chr, feature_end, coords_refGnm2smplGnm)
+
+        if not (smpl_chr_start and smpl_chr_end and smpl_pos_start and smpl_pos_end):
+            print(f"Error: No correspondence found for feature location ('{line.strip()}')")
+            sys.exit(1)
+        elif smpl_chr_start != smpl_chr_end:
+            print(f"Error: Feature spans multiple chromosomes ('{line.strip()}')")
+            sys.exit(1)
+
+        # Update feature with new positions
+        parts[0] = smpl_chr_start
+        parts[3] = str(smpl_pos_start)
+        parts[4] = str(smpl_pos_end)
+
+        new_gff_lines.append('\t'.join(parts) + '\\n')
+
+    # Write the output GFF with metadata
+    out_gff_file = out_prefix + "_transferredAnnotation.gff"
+    with open(out_gff_file, "w") as f_out_gff:
+        # Write the version line if present
+        if version_line:
+            f_out_gff.write(version_line)
+        
+        # Write metadata if requested
+        if include_metada_in_gff:
+            hash_md5 = hashlib.md5()
+            with open(input_gff, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_md5.update(chunk)
+            in_gff_hash = hash_md5.hexdigest()
+            hash_md5 = hashlib.md5()
+            with open(__file__, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_md5.update(chunk)
+            script_hash = hash_md5.hexdigest()
+            f_out_gff.write(f"# Metadata added by the script '{os.path.abspath(__file__)}'\\n")
+            f_out_gff.write(f"#   -from: '{os.path.abspath(input_gff)}'\\n          [hashlib.md5_4096:'{in_gff_hash}']\\n")
+            f_out_gff.write(f"#   -by: '{os.path.abspath(__file__)}'\\n        [hashlib.md5_4096:'{script_hash}']\\n")
+            f_out_gff.write(f"#   -on: '{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}'\\n")
+
+        # Write transformed GFF content
+        f_out_gff.writelines(new_gff_lines)
 
 
 def main():
-    ref_fa="${annot_fa}"
-    ref_gff="${annot_gff}"
-    smpl_fa="${sample_fa}"
-    out_prefix="${meta.id}"
-    #save_psa=\${save_psa}
-    #include_metada_in_gff=\${include_metada_in_gff}
+    ref_fa="input/GCF_009858895.2_ASM985889v3_genomic.fna"
+    ref_gff="input/GCF_009858895.2_ASM985889v3_genomic.gff"
+    smpl_fa="input/sars_assembled.fasta"
+    out_prefix="clinic"
+    #save_psa=${save_psa}
+    #include_metada_in_gff=${include_metada_in_gff}
     save_psa=True
     include_metada_in_gff=True
 
@@ -196,7 +197,5 @@ def main():
     transform_gff(ref_gff, coords_refGnm2smplGnm, out_prefix, include_metada_in_gff)
 
 
-
 if __name__ == "__main__":
     main()
-

@@ -49,12 +49,8 @@ process IVAR_VARIANTS_ALL_POS {
   }' ${meta.id}.mpileup > ${meta.id}.cov
 
   # TSV: add remain line (variable + unvaribale)
-  ## NOTE: The 'awk' approach is much faster than the 'grep' approach (in regex mode with a large pattern file) but is not compatible with the ivar container (awk functionality not available in the simplified version of awk included in the container ('BusyBox v1.36.1')).
-  ## TODO: monitor time gains and see if it's better to isolate these parsing tasks in a specific process with a standar bash container or a pandas container.
   sed '1d' ${meta.id}_raw.tsv > ${meta.id}_tmp.tsv
-  #sed '1d' ${meta.id}_raw.tsv | awk -F "\\t" '{print \$1,\$2}' | sort -u > ${meta.id}_varPos.txt
-  sed '1d' ${meta.id}_raw.tsv | awk -F "\\t" '{print "^"\$1"\\t"\$2"\\t"}' | sort -u > ${meta.id}_pattern_varPos.txt
-  #awk 'NR == FNR {ignore[\$1, \$2]; next} !(\$1, \$2) in ignore' ${meta.id}_varPos.txt ${meta.id}.cov >> ${meta.id}_tmp.tsv
+  sed '1d' ${meta.id}_raw.tsv | awk -F "\\t" '{print "^"\$1"\\t"\$2"\t"}' | sort -u > ${meta.id}_pattern_varPos.txt
   grep -v -f ${meta.id}_pattern_varPos.txt ${meta.id}.cov >> ${meta.id}_tmp.tsv
   head -n1 ${meta.id}_raw.tsv > ${meta.id}.tsv
   sort -k1,1 -k2,2n -k8r,8n -s ${meta.id}_tmp.tsv >> ${meta.id}.tsv
