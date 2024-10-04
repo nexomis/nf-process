@@ -3,11 +3,11 @@ process KALLISTO_QUANT {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/kallisto:0.50.1--h6de1650_2"
 
   label 'cpu_med'
-  label 'mem_8G'
+  label 'mem_med'
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
-  path index
+  tuple val(meta2), path(index, stageAs: "input_index/index")
 
   output:
   tuple val(meta), path("$meta.id", type: 'dir'), emit: output_dir

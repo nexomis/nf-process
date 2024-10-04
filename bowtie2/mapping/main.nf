@@ -3,26 +3,19 @@ process BOWTIE2 {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/bowtie2:2.5.4--he20e202_3"
 
   label 'cpu_high'
-  label 'mem_high'
+  label 'mem_8GB' // 4GB max of foot print: https://hpc.nih.gov/apps/bowtie2.html
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
   tuple val(meta2), path(idx, arity: 1, stageAs: 'input_ref/*')
 
   output:
-  tuple val(meta), path("${meta.id}.sam") , emit: sam
-  tuple val(meta), path("${meta.id}.log") , emit: log
-  // output_dir: usefull ?
+  tuple val(meta), path("${meta.label ?: meta.id}.sam")
 
   script:
-
-  // TODO: check and manage if necessary option to extract unmapped read on fastq file (maybe not via task.ext if depend of reads are SE or PE): '--un-conc[-gz]' '--un[-gz]'
-  // in addition with extraction of unmapped reads, the default settings can be '--no-unal' (exclusion of unmapped reads from output SAM)
-
   """
   #!/usr/bin/bash
 
-  # index prefix (in case of error: check if 'ls -d {idx}/{pattern}' is sufficent with symbolic links, whether add level 'ls -d {idx}/*/{pattern}' or use find use 'max-depth=2' and '-L')
   idx_w_prefix=\$(ls -d ${idx}/*.rev.1.bt2 | sed "s/\\.rev\\.1\\.bt2\$//")
   if [ -z "\$idx_w_prefix" ]; then
     idx_w_prefix=\$(ls -d ${idx}/*.rev.1.bt2l | sed "s/\\.rev\\.1\\.bt2l\$//")
@@ -36,9 +29,8 @@ process BOWTIE2 {
     -x \$idx_w_prefix \\
     ${ (reads.size() == 1) ? "-U ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
     --threads $task.cpus \\
-    -S ${meta.id}.sam \\
-    ${task.ext.args ?: ''} \\
-    2> ${meta.id}.log
+    -S ${meta.label ?: meta.id}.sam \\
+    ${task.ext.args ?: ''}
   """
 
   stub:
@@ -46,6 +38,6 @@ process BOWTIE2 {
   """
   #!/usr/bin/bash
 
-  touch ${meta.id}.sam ${meta.id}.log
+  touch ${meta.label ?: meta.id}.sam
   """
 }

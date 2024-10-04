@@ -2,19 +2,16 @@ process SEQTK_SAMPLE {
   container 'staphb/seqtk:1.4'
 
   label 'cpu_low'
-  label 'mem_8G'
+  label 'mem_low'
 
   input:
   tuple val(meta), path(files, arity: 1..2, stageAs: 'input_raw/*')
+  val(num_reads)
 
   output:
   tuple val(meta), path("${meta.id}*.fq", arity: 1..2)
 
   script:
-  def num_reads = 100000
-  if (task.ext.num_reads) {
-    num_reads = task.ext.num_reads
-  }
   def base_cmd = "seqtk sample -s42"
   def cmd_reads1 = "${base_cmd} ${files[0]} ${num_reads}  > ${meta.id}.fq"
   def cmd_reads2 = ""
