@@ -1,7 +1,5 @@
 process TRANSFERT_GFF {
-  container "python3.12-biopython"  // 340MiB - test from slim-3.12
-  //container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/biopython:1.70--np112py36_0"   // 220 MiB !!
-  // pegi3s/biopython:1.78 (python 3.8.10 ...)
+  container "${params.biocontainers_registry ?: 'quay.io'}/nexomis/py-bioseq:102024"
 
   input:
   tuple val(meta), path(sample_fa, arity: 1, stageAs: 'input/')  // 'stageAs' and templates ?
@@ -11,7 +9,7 @@ process TRANSFERT_GFF {
 
   output:
   tuple val(meta), path("${meta.id}_genomicCoords.csv", type: 'file') , optional:false ,  emit: genomic_coords
-  tuple val(meta), path("${meta.id}_transferedAnnotation.gff", type: 'file') , optional:false ,  emit: transfered_gff
+  tuple val(meta), path("${meta.id}_transferredAnnotation.gff", type: 'file') , optional:false ,  emit: transfered_gff
   tuple val(meta), path("${meta.id}_*_vs_*_globalAlgn.txt", type: 'file') , optional:true ,  emit: psa
   //don-t work: tuple val(meta), path([sample, "${meta.id}_transferedAnnotation.gff"], type: 'file') , optional:false ,  emit: fa_and_transfered_gff
 

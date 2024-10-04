@@ -184,12 +184,12 @@ def transform_gff(input_gff, coords_refGnm2smplGnm, out_prefix, include_metada_i
 
 
 def main():
-    ref_fa="input/GCF_009858895.2_ASM985889v3_genomic.fna"
-    ref_gff="input/GCF_009858895.2_ASM985889v3_genomic.gff"
-    smpl_fa="input/sars_assembled.fasta"
-    out_prefix="clinic"
-    #save_psa=${save_psa}
-    #include_metada_in_gff=${include_metada_in_gff}
+    ref_fa="${annot_fa}"
+    ref_gff="${annot_gff}"
+    smpl_fa="${sample_fa}"
+    out_prefix="${meta.id}"
+    #save_psa=\${save_psa}
+    #include_metada_in_gff=\${include_metada_in_gff}
     save_psa=True
     include_metada_in_gff=True
 

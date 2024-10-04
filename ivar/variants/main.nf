@@ -54,24 +54,24 @@ process IVAR_VARIANTS_ALL_POS {
   cut -f1-4 ${meta.id}.mpileup > ${meta.id}_col1-4.mpileup
 
 
-  #### only if requested: use boolean input? in case of batch
-  ## complete tsv result with unvariable position by adding of coverage and RefNucl
-  # recup coverage and Nucl. of all pos: variable and unvariable (not necessary ref.nucl ?! but in all case not impact the following because about this generate file, only unvariable region while used!) 
-  nbCol=\$(awk -F'\\t' 'NR==1 { print NF }' ${meta.id}_raw.tsv)
-  awk -F '\\t' -v nbCol="\$nbCol" '{
-    printf \$1"\\t"\$2"\\t"\$3"\\tNA\\t"\$4"\\tNA\\tNA\\tNA\\tNA\\tNA\\t0\\t"\$4; 
-    for (i = 13; i <= nbCol; i++) {
-      printf "\\tNA";
-    } 
-    print "";
-  }' ${meta.id}.mpileup > ${meta.id}.cov
-  # TSV: add remain line (variable + unvaribale)
-  sed '1d' ${meta.id}_raw.tsv > ${meta.id}_tmp.tsv
-  sed '1d' ${meta.id}_raw.tsv | awk -F "\\t" '{print "^"\$1"\\t"\$2"\t"}' | sort -u > ${meta.id}_pattern_varPos.txt
-  grep -v -f ${meta.id}_pattern_varPos.txt ${meta.id}.cov >> ${meta.id}_tmp.tsv
-  head -n1 ${meta.id}_raw.tsv > ${meta.id}.tsv
-  sort -k1,1 -k2,2n -k8r,8n -s ${meta.id}_tmp.tsv >> ${meta.id}.tsv
-  rm ${meta.id}_tmp.tsv ${meta.id}_pattern_varPos.txt
+  ##### only if requested? : use boolean parameters input? in case of batch
+  # ## complete tsv result with unvariable position by adding of coverage and RefNucl
+  # # recup coverage and Nucl. of all pos: variable and unvariable (not necessary ref.nucl ?! but in all case not impact the following because about this generate file, only unvariable region while used!) 
+  # nbCol=\$(awk -F'\\t' 'NR==1 { print NF }' ${meta.id}_raw.tsv)
+  # awk -F '\\t' -v nbCol="\$nbCol" '{
+  #   printf \$1"\\t"\$2"\\t"\$3"\\tNA\\t"\$4"\\tNA\\tNA\\tNA\\tNA\\tNA\\t0\\t"\$4; 
+  #   for (i = 13; i <= nbCol; i++) {
+  #     printf "\\tNA";
+  #   } 
+  #   print "";
+  # }' ${meta.id}.mpileup > ${meta.id}.cov
+  # # TSV: add remain line (variable + unvaribale)
+  # sed '1d' ${meta.id}_raw.tsv > ${meta.id}_tmp.tsv
+  # sed '1d' ${meta.id}_raw.tsv | awk -F "\\t" '{print "^"\$1"\\t"\$2"\t"}' | sort -u > ${meta.id}_pattern_varPos.txt
+  # grep -v -f ${meta.id}_pattern_varPos.txt ${meta.id}.cov >> ${meta.id}_tmp.tsv
+  # head -n1 ${meta.id}_raw.tsv > ${meta.id}.tsv
+  # sort -k1,1 -k2,2n -k8r,8n -s ${meta.id}_tmp.tsv >> ${meta.id}.tsv
+  # rm ${meta.id}_tmp.tsv ${meta.id}_pattern_varPos.txt
 
   """
 
