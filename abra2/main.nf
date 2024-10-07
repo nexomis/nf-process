@@ -8,14 +8,15 @@ process ABRA2 {
   label 'mem_high'
 
   input:
-  tuple val(meta), path(bam, arity: 2, stageAs: 'input_raw/*')        // sorted and index input bam with bai
+  tuple val(meta), path(bam, stageAs: 'input_raw/*'), path(bai, stageAs: 'input_raw/*')
   tuple val(meta2), path(ref_fa, arity: 1, stageAs: 'input_ref/*')
 
   output:
-  tuple val(meta), path("${meta.id}_abra2.bam"), path("${meta.id}_abra2.bam.bai"), emit: bam
+  tuple val(meta), path("${meta.id}_abra2.bam"), path("${meta.id}_abra2.bai"), emit: bam
 
   script:
   //bam_out = "${bam[0].parent}/${bam[0].getBaseName()}_abra2.${bam[0].getExtension()}"
+
 
   """
   #!/usr/bin/bash
@@ -30,6 +31,7 @@ process ABRA2 {
     --ref ${ref_fa} \\
     --threads ${task.cpus} \\
     --index \\
+    ${ (meta?.type == 'SE') ? '--single' : ''} \\
     ${task.ext.args ?: ''}
   """
 

@@ -20,7 +20,7 @@ process BOWTIE2_BUILD {
   bowtie2-build --threads $task.cpus \\
     ${task.ext.args ?: ''} \\
     $fasta \\
-    ${meta.id}/${meta.id} \\
+    ${meta.id}/index
 
   """
 

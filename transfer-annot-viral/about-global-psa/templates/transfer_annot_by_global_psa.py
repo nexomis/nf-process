@@ -175,8 +175,8 @@ def transform_gff(input_gff, coords_refGnm2smplGnm, out_prefix, include_metada_i
                     hash_md5.update(chunk)
             script_hash = hash_md5.hexdigest()
             f_out_gff.write(f"# Metadata added by the script '{os.path.abspath(__file__)}'\\n")
-            f_out_gff.write(f"#   -from: '{os.path.abspath(input_gff)}'\\n          [hashlib.md5_4096:'{in_gff_hash}']\\n")
-            f_out_gff.write(f"#   -by: '{os.path.abspath(__file__)}'\\n        [hashlib.md5_4096:'{script_hash}']\\n")
+            f_out_gff.write(f"#   -from: '{os.path.abspath(input_gff)}'\\n#          [hashlib.md5_4096:'{in_gff_hash}']\\n")
+            f_out_gff.write(f"#   -by: '{os.path.abspath(__file__)}'\\n#        [hashlib.md5_4096:'{script_hash}']\\n")
             f_out_gff.write(f"#   -on: '{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}'\\n")
 
         # Write transformed GFF content
