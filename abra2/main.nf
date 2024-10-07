@@ -31,7 +31,7 @@ process ABRA2 {
     --ref ${ref_fa} \\
     --threads ${task.cpus} \\
     --index \\
-    ${ (meta?.type == 'SE') ? '--single' : ''} \\
+    ${ (meta?.read_type == 'SE') ? '--single' : ''} \\
     ${task.ext.args ?: ''}
   """
 
