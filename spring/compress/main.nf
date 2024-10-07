@@ -2,7 +2,7 @@ process SPRING_COMPRESS {
   container 'ghcr.io/nexomis/spring:1.1.1'
 
   label 'cpu_low'
-  label 'mem_12G'
+  label 'mem_med'
 
   input:
   tuple val(meta), path(files, arity: 1..2, stageAs: "inputs/*")
