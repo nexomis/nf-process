@@ -1,4 +1,3 @@
-
 process IVAR_VARIANTS_ALL {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/ivar:1.4.3--h43eeafb_0"
 
@@ -10,8 +9,8 @@ process IVAR_VARIANTS_ALL {
   tuple val(meta2), path(genome_ref, arity: 2, stageAs: 'input/')  // genome_ref: .fa and .gff/.gtf
 
   output:
-  tuple val(meta), path("${meta.id}_raw.tsv", type: 'file') , optional:false , emit: raw_iSNV_tsv
-  tuple val(meta), path("${meta.id}_cols_1_4.mpileup", type: 'file') , optional:false , emit: mpileup_cov
+  tuple val(meta), path("${meta.label ?: meta.id}_raw.tsv", type: 'file') , optional:false , emit: raw_iSNV_tsv
+  tuple val(meta), path("${meta.label ?: meta.id}_cols_1_4.mpileup", type: 'file') , optional:false , emit: mpileup_cov
 
   script:
   genome_ref_fa = genome_ref[0]
@@ -24,17 +23,17 @@ process IVAR_VARIANTS_ALL {
     -aa -A -B -Q 0 \\
     --reference ${genome_ref_fa} \\
     ${task.ext.args ?: ''} \\
-    ${bam[0]} > ${meta.id}.mpileup
+    ${bam[0]} > ${meta.label ?: meta.id}.mpileup
 
-  cat ${meta.id}.mpileup | ivar variants \\
-    -p ${meta.id}_raw \\
+  cat ${meta.label ?: meta.id}.mpileup | ivar variants \\
+    -p ${meta.label ?: meta.id}_raw \\
     -q 0 -t 0 -m 0 \\
     -r ${genome_ref_fa} \\
     -g ${genome_ref_gff} \\
-    ${task.ext.args2 ?: ''}
+    ${task.ext.args2 ?: ''}   // 'ext.args2' necessarily empty as all 'ivar variants' options are already used ...
 
   ## Coverage
-  cut -f1-4 ${meta.id}.mpileup > ${meta.id}_cols_1_4.mpileup
+  cut -f1-4 ${meta.label ?: meta.id}.mpileup > ${meta.label ?: meta.id}_cols_1_4.mpileup
 
   """
 
@@ -42,6 +41,6 @@ process IVAR_VARIANTS_ALL {
   """
   #!/usr/bin/bash
 
-  touch ${meta.id}_raw.tsv ${meta.id}_col1-4.mpileup
+  touch ${meta.label ?: meta.id}_raw.tsv ${meta.label ?: meta.id}_col1-4.mpileup
   """ 
 }
