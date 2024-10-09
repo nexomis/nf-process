@@ -54,7 +54,7 @@ def get_ref2alt(ref_file, alt_file, out_prefix, save_psa):
     ref_pos = 1
     alt_pos = 1
 
-    # todo: '0' if before start of reference sequence and smpl_lentgh if after but with WARNING in both case !
+    # TODO: '0' if before start of reference sequence and smpl_lentgh if after but with WARNING in both case !
     # TODO: add -1 if out of ref (5' or 3') using alt/ref_pos and length of ref/alt + add del/ins after end to prevent gaps at end ?
     for i in range(best.length):
         ref_char = ref[i]
