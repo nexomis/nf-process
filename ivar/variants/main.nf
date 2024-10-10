@@ -1,5 +1,5 @@
 process IVAR_VARIANTS_ALL {
-  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/ivar:1.4.3--h43eeafb_0"
+  container "quay.io/nexomis/ivar:1.4.3"
 
   label 'cpu_x1'
   label 'mem_med'
@@ -23,17 +23,15 @@ process IVAR_VARIANTS_ALL {
     -aa -A -B -Q 0 \\
     --reference ${genome_ref_fa} \\
     ${task.ext.args ?: ''} \\
-    ${bam[0]} > ${meta.label ?: meta.id}.mpileup
-
-  cat ${meta.label ?: meta.id}.mpileup | ivar variants \\
-    -p ${meta.label ?: meta.id}_raw \\
-    -q 0 -t 0 -m 0 \\
-    -r ${genome_ref_fa} \\
-    -g ${genome_ref_gff} \\
-    ${task.ext.args2 ?: ''}   // 'ext.args2' necessarily empty as all 'ivar variants' options are already used ...
-
-  ## Coverage
-  cut -f1-4 ${meta.label ?: meta.id}.mpileup > ${meta.label ?: meta.id}_cols_1_4.mpileup
+    ${bam[0]} |\\
+    loose_ends |\\
+    tee >(cut -f1-4 > ${meta.label ?: meta.id}_cols_1_4.mpileup) |\\
+    ivar variants \\
+      -p ${meta.label ?: meta.id}_raw \\
+      -q 0 -t 0 -m 0 \\
+      -r ${genome_ref_fa} \\
+      -g ${genome_ref_gff} \\
+       ${task.ext.args2 ?: ''}  
 
   """
 
