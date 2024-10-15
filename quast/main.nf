@@ -7,7 +7,7 @@ process QUAST {
   input:
   tuple val(meta), path(assembly, stageAs: "inputs/assembly??.fa")
   tuple val(meta2), path(ref_fa, stageAs: "inputs/reference.fa")
-  tuple val(meta3), path(bam, stageAs: "inputs/aln??.bam"), path(bai, stageAs: "inputs/aln??.bai") 
+  tuple val(meta3), path(bam, stageAs: "inputs/aln??.bam"), path(bai, stageAs: "inputs/aln??.bam.bai") 
 
   output:
   tuple val(meta), path("${meta.label ?: meta.id}/report.html", type: 'file') , emit: html

@@ -15,12 +15,11 @@ process KRAKEN2 {
   tuple val(meta), path("*.txt")               , emit: report
   tuple val(meta), path("*.gz")            , emit: output
 
-  // modify ext from config to enable classified and unclassified
-  // ext:
-  // args: --classified-out classified.#.fq --unclassified-out unclassified.#.fq
-
   script:
-
+  def unclassified_args = ""
+  if (task.ext.add_unclassified && task.ext.add_unclassified == "yes") {
+    unclassified_args = "--unclassified-out ${meta.label ?: meta.id}.unclassified#.fq"
+  }
   """
   #!/usr/bin/bash
 
@@ -29,6 +28,7 @@ process KRAKEN2 {
   --db $db \\
   ${(reads.size() === 2)? '--paired': ''} \\
   ${task.ext.args ?: ''} \\
+  $unclassified_args \\
   $reads \\
   | gzip > ${meta.id}.gz
   

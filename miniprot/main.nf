@@ -9,15 +9,12 @@ process MINIPROT {
   tuple val(meta2), path(prot_fasta, arity: 1, stageAs: "inputs/proteome.fa")  
 
   output:
-  tuple val(meta_out), path("${meta.id}_${meta2.id}.gff")
+  tuple val(meta), path("${meta.label ?: meta.id}.gff")
 
   script:
-  def name_annot = "${meta.id}_${meta2.id}"
-  meta_out = meta.clone()
-  meta_out.label = "${name_annot}"
   """
   #!/bin/bash
-  miniprot ${task.ext.args ?: ''} -t $task.cpus --gff $genome_fasta $prot_fasta > ${name_annot}.gff.tmp
-  grep -v "##PAF" ${name_annot}.gff.tmp > ${name_annot}.gff
+  miniprot ${task.ext.args ?: ''} -t $task.cpus --gff $genome_fasta $prot_fasta > ${meta.label ?: meta.id}.gff.tmp
+  grep -v "##PAF" ${meta.label ?: meta.id}.gff.tmp > ${meta.label ?: meta.id}.gff
   """
 }
