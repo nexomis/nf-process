@@ -30,8 +30,10 @@ process QUAST {
   }
   if (bam_not_empty) {args_bam = "--bam " + bamList.join(',')}
   def out_dir = (meta.label ?: meta.id)
+  // Note for the --min-contig args https://github.com/ablab/quast/issues/273
   """
   quast.py \\
+    --min-contig 0 \\
     --output-dir $out_dir \\
     --labels ${meta.id} \\
     --threads $task.cpus \\
