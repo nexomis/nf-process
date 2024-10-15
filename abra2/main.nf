@@ -3,8 +3,8 @@
 process ABRA2 {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/abra2:2.24--hdcf5f25_3"
 
-  label 'cpu_high'
-  label 'mem_high'
+  label 'cpu_low'
+  label 'mem_low'
 
   input:
   tuple val(meta), path(bam, stageAs: 'input_raw/*'), path(bai, stageAs: 'input_raw/*')
