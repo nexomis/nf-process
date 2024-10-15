@@ -187,7 +187,7 @@ def main():
     ref_fa="${annot_fa}"
     ref_gff="${annot_gff}"
     smpl_fa="${sample_fa}"
-    out_prefix="${meta.id}"
+    out_prefix="${out_prefix}"
     #save_psa=\${save_psa}
     #include_metada_in_gff=\${include_metada_in_gff}
     save_psa=True
