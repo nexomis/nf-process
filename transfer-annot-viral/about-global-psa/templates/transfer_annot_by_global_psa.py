@@ -114,7 +114,7 @@ def transform_gff(input_gff, coords_refGnm2smplGnm, out_prefix, include_metada_i
 
     for line in lines:
         if line.startswith("##sequence-region"):
-            parts = line.strip().split(" ")
+            parts = line.rstrip().split(" ")
             if len(parts) == 4:
                 ref_chr, ref_start, ref_end = parts[1], int(parts[2]), int(parts[3])
                 smpl_chr_start, smpl_pos_start = transform_individual_coordinate(ref_chr, ref_start, coords_refGnm2smplGnm)
@@ -131,29 +131,30 @@ def transform_gff(input_gff, coords_refGnm2smplGnm, out_prefix, include_metada_i
             # keeped in option?
             continue
 
-        parts = line.strip().split('\t')
-        if len(parts) < 9:
-            print(f"Error: Non commented line with less than 9 columns: {line.strip()}")
-            sys.exit(1)
+        parts = line.rstrip().split('\t')
 
-        ref_chr, feature_start, feature_end = parts[0], int(parts[3]), int(parts[4])
+        if len(parts) > 1:
+            if len(parts) < 9:
+                print(f"Error: Non commented line with less than 9 columns: |{line.strip()}|")
+                sys.exit(1)
+            ref_chr, feature_start, feature_end = parts[0], int(parts[3]), int(parts[4])
 
-        smpl_chr_start, smpl_pos_start = transform_individual_coordinate(ref_chr, feature_start, coords_refGnm2smplGnm)
-        smpl_chr_end, smpl_pos_end = transform_individual_coordinate(ref_chr, feature_end, coords_refGnm2smplGnm)
+            smpl_chr_start, smpl_pos_start = transform_individual_coordinate(ref_chr, feature_start, coords_refGnm2smplGnm)
+            smpl_chr_end, smpl_pos_end = transform_individual_coordinate(ref_chr, feature_end, coords_refGnm2smplGnm)
 
-        if not (smpl_chr_start and smpl_chr_end and smpl_pos_start and smpl_pos_end):
-            print(f"Error: No correspondence found for feature location ('{line.strip()}')")
-            sys.exit(1)
-        elif smpl_chr_start != smpl_chr_end:
-            print(f"Error: Feature spans multiple chromosomes ('{line.strip()}')")
-            sys.exit(1)
+            if not (smpl_chr_start and smpl_chr_end and smpl_pos_start and smpl_pos_end):
+                print(f"Error: No correspondence found for feature location ('{line.strip()}')")
+                sys.exit(1)
+            elif smpl_chr_start != smpl_chr_end:
+                print(f"Error: Feature spans multiple chromosomes ('{line.strip()}')")
+                sys.exit(1)
 
-        # Update feature with new positions
-        parts[0] = smpl_chr_start
-        parts[3] = str(smpl_pos_start)
-        parts[4] = str(smpl_pos_end)
+            # Update feature with new positions
+            parts[0] = smpl_chr_start
+            parts[3] = str(smpl_pos_start)
+            parts[4] = str(smpl_pos_end)
 
-        new_gff_lines.append('\t'.join(parts) + '\\n')
+            new_gff_lines.append('\t'.join(parts) + '\\n')
 
     # Write the output GFF with metadata
     out_gff_file = out_prefix + "_transferredAnnotation.gff"
