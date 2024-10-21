@@ -127,8 +127,7 @@ def transform_gff(input_gff, coords_refGnm2smplGnm, out_prefix, include_metada_i
                     print(f"Warning: Could not transform coordinates for sequence-region: {line.strip()}")
             continue
 
-        if line.startswith("#"):
-            # keeped in option?
+        if line.startswith("#") or not line.strip():
             continue
 
         parts = line.strip().split('\t')
