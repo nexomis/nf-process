@@ -33,7 +33,7 @@ process BOWTIE2 {
     -S ${meta.label ?: meta.id}.sam \\
     --rg-id "${meta.label ?: meta.id}" \\
     --rg "SM:${meta.label ?: meta.id}" \\
-    --rg "PL:${meta.label ?: meta.id}" \\
+    --rg "PL:ILLUMINA" \\
     --rg "LB:${meta.label ?: meta.id}" \\
     ${task.ext.args ?: ''}
   """
