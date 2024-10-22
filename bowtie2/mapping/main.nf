@@ -1,3 +1,4 @@
+// NOTE: resulting SAM include minimal read_group information (generic value) following GATK specification.
 
 process BOWTIE2 {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/bowtie2:2.5.4--he20e202_3"
@@ -28,8 +29,12 @@ process BOWTIE2 {
   bowtie2 \\
     -x \$idx_w_prefix \\
     ${ (reads.size() == 1) ? "-U ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
-    --threads $task.cpus \\
+    --threads ${task.cpus} \\
     -S ${meta.label ?: meta.id}.sam \\
+    --rg-id "${meta.label ?: meta.id}" \\
+    --rg "SM:${meta.label ?: meta.id}" \\
+    --rg "PL:ILLUMINA" \\
+    --rg "LB:${meta.label ?: meta.id}" \\
     ${task.ext.args ?: ''}
   """
 
