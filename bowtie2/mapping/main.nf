@@ -29,7 +29,7 @@ process BOWTIE2 {
   bowtie2 \\
     -x \$idx_w_prefix \\
     ${ (reads.size() == 1) ? "-U ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
-    --threads $task.cpus \\
+    --threads ${task.cpus} \\
     -S ${meta.label ?: meta.id}.sam \\
     --rg-id "${meta.label ?: meta.id}" \\
     --rg "SM:${meta.label ?: meta.id}" \\
