@@ -2,7 +2,7 @@ process BWA_MEM {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/bwa:0.7.18--he4a0461_1"
 
   label 'cpu_high'
-  label 'mem_8GB'
+  label 'mem_med'
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
