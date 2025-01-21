@@ -1,5 +1,5 @@
 process SAV_CALL {
-  container "quay.io/nexomis/sav_call:0.2.0"
+  container "quay.io/nexomis/sav_call:0.2.0-py"
 
   label 'cpu_x1'
   label 'mem_med'
@@ -15,11 +15,7 @@ process SAV_CALL {
   tuple val(meta), path("${meta.label ?: meta.id}.raw_indel.csv", type: 'file') , optional:false , emit: snv_raw_indel
   tuple val(meta), path("${meta.label ?: meta.id}.base.csv", type: 'file') , optional:false , emit: base_comp
 
-
   script:
-
-  // TODO: manage sample specific option using '${meta.sav_call_args ?: ''}' like in kallisto process (e.g. '--R1-strand' and '--R2-strand')?
-
   """
   #!/usr/bin/bash
   
@@ -27,14 +23,9 @@ process SAV_CALL {
     --prefix-out ${meta.label ?: meta.id}_snv \\
     --bam ${bam[0]} \\
     --reference ${ref_fa} \\
-    --R1-strand forward --R2-strand reverse \\
     --base-csv ${meta.label ?: meta.id}.base.csv \\
     --indel-csv ${meta.label ?: meta.id}.raw_indel.csv \\
-    ${ task.ext.alt_ratio_threshold ? "--min-freq '${task.ext.alt_ratio_threshold};${task.ext.alt_ratio_threshold};${task.ext.alt_ratio_threshold}'" : '' } \\
-    ${ task.ext.min_dp ? "--min-count '${task.ext.min_dp};${task.ext.min_dp};${task.ext.min_dp}'" : '' } \\
-    --max-n-pileup ${task.ext.max_n_pileup ?: ''} \\
-    ${task.ext.args ?: ''}
-
+    ${task.ext.sav_call_args ?: ''}
   """
 
   stub:  
