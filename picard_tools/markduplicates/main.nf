@@ -32,6 +32,6 @@ process PICARD_MARK_DUPLICATES {
   """
   #!/usr/bin/bash
 
-  touch ${meta.label ?: meta.id}_RmDup.bam ${meta.label ?: meta.id}_RmDup.txt
+  touch ${meta.label ?: meta.id}_RmDup.bam ${meta.label ?: meta.id}_RmDup.bai ${meta.label ?: meta.id}_RmDup.txt
   """ 
 }

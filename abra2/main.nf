@@ -34,6 +34,6 @@ process ABRA2 {
   """
   #!/usr/bin/bash
 
-  touch ${meta.label ?: meta.id}_abra2.bam ${meta.label ?: meta.id}_abra2.bam.bai
+  touch ${meta.label ?: meta.id}_abra2.bam ${meta.label ?: meta.id}_abra2.bai
   """
 }

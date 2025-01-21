@@ -38,15 +38,15 @@ process KRAKEN2 {
 
   stub:
   def cmd_reads2 = ""
-  if (files.size() > 1) {
+  if (reads.size() > 1) {
     cmd_reads2 = "touch ${meta.id}.unclassified_R2.fq ${meta.id}.classified_R2.fq"
   }
   """
   #!/usr/bin/bash
 
-  touch ${meta.id}.output.txt ${meta.id}.report.txt ${meta.id}.classifiedreads.txt
+  touch ${meta.id}.gz ${meta.id}.report.txt ${meta.id}.classifiedreads.txt
   touch ${meta.id}.unclassified_R1.fq ${meta.id}.classified_R1.fq
-  ${cmd_reads2}
+  ${cmd_reads2} 
   """
 
 }

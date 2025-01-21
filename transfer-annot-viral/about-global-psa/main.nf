@@ -20,6 +20,6 @@ process TRANSFERT_GFF {
 
   stub:
   """
-  touch ${meta.label ?: meta.id}_transferedAnnotation.gff ${meta.label ?: meta.id}_genomicCoords.csv
+  touch ${meta.label ?: meta.id}_transferredAnnotation.gff ${meta.label ?: meta.id}_genomicCoords.csv
   """
 }

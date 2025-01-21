@@ -40,6 +40,6 @@ process SAM_BAM_SORT_IDX {
   """
   #!/usr/bin/bash
 
-  touch ${meta.label ?: meta.id}.bam ${meta.label ?: meta.id}.bam.bai ${meta.label ?: meta.id}.flagstat
+  touch ${meta.label ?: meta.id}.bam ${meta.label ?: meta.id}.bam.bai ${meta.label ?: meta.id}.flagstats
   """
 }
