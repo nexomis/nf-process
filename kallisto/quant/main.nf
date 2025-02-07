@@ -10,23 +10,22 @@ process KALLISTO_QUANT {
   tuple val(meta2), path(index, stageAs: "input_index/index")
 
   output:
-  tuple val(meta), path("$meta.id", type: 'dir'), emit: output_dir
-  tuple val(meta), path("${meta.id}.log", type: 'file'), emit: log
+  tuple val(meta), path("${meta.label ?: meta.id}/abundance.h5", type: 'file'), emit: h5
+  tuple val(meta), path("${meta.label ?: meta.id}.log", type: 'file'), emit: log
 
   script:
+  def name=meta.label ?: meta.id
   """
   #!/usr/bin/bash
   
   kallisto quant --threads ${task.cpus} \\
     --index ${index} \\
-    --output-dir ${meta.id} \\
+    --output-dir ${name} \\
     ${meta.kallisto_args ?: ''} \\
     ${task.ext.args ?: ''} \\
     ${ (reads.size() == 1) ? '--single' : ''} ${reads} \\
-    2> ${meta.id}.log
+    2> ${name}.log
 
-  rm ${meta.id}/abundance.tsv
-    
   """
 
   stub:

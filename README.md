@@ -10,7 +10,7 @@ Objectives:
 
 - Each process should accomplish a single task or a closely related set of tasks.
 
-- Store processes in individual files nmaed `main.nf` within a directory structure that reflects the tool and analysis step.
+- Store processes in individual files named `main.nf` within a directory structure that reflects the tool and analysis step.
 
 - Use clear, descriptive names for processes:
   - Use **lower_snake_case** for directory holding the process script `main.nf`
