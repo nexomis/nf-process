@@ -3,7 +3,7 @@ process KALLISTO_QUANT {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/kallisto:0.50.1--h6de1650_2"
 
   label 'cpu_med'
-  label 'mem_med'
+  label 'mem_8G'
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
