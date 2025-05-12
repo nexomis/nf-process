@@ -92,8 +92,8 @@ Below are some example of names that can be used.
 
 - `meta.read_type`:
   - `SR` for single-read
-  - `PE` for pair-end 
-  - `LR` for long-read 
+  - `PE` for pair-end
+  - `LR` for long-read
   - `spring` for compressed SR or PE  
 - `meta.ref_id`: Reference identifier.
 - `meta.args_{{tool}}`: Tool/process-specific arguments.
