@@ -1,6 +1,6 @@
 process SLIMFASTQ_DECOMPRESS {
   container 'quay.io/biocontainers/slimfastq:2.04--h503566f_5'
-
+  tag "${meta.id}"
   label 'cpu_x2'
   label 'mem_4G'
 
