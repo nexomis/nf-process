@@ -31,6 +31,10 @@ process EXTRACT_MAPPED_FASTQ {
     -1 ${meta.label ?: meta.id}.unmapped_R1.fq.gz \\
     -2 ${meta.label ?: meta.id}.unmapped_R2.fq.gz
 
+  for file in *_R2.fq.gz; do
+    [ "\$(zcat \\"\$file\\" 2>/dev/null | wc -l)" -lt 4 ] && rm "\$file"
+  done
+
   """
 
   stub:

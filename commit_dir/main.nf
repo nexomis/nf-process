@@ -1,7 +1,7 @@
 // Groovy function to determine the output directory name
 // Defined globally in the script file to be accessible in output directive
 def getOutputDirName(inputPath) {
-    out_dir="${inputPath}"
+    def out_dir="${inputPath}"
     if (inputPath.isDirectory()) {
         // If it's a directory, the output name *is* the directory name
         return out_dir

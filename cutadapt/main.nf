@@ -8,22 +8,29 @@ def parseArguments(String argString) {
     // Regex to split by space, but respect quotes. Handles simple cases.
     // Allows for quoted arguments, e.g. -a "adapter seq"
     def tokens = argString.tokenize(/(?<!\\)".*?(?<!\\)"|\S+/)
-                        .collect { it.startsWith('"') && it.endsWith('"') ? it.substring(1, it.length() - 1) : it }
+                        .collect { it -> it.startsWith('"') && it.endsWith('"') ? it.substring(1, it.length() - 1) : it }
 
-    int i = 0
-    while (i < tokens.size()) {
-        String token = tokens[i]
+    String pendingFlag = ""
+    tokens.each { token ->
         if (token.startsWith("-")) {
-            if (i + 1 < tokens.size() && !tokens[i+1].startsWith("-")) {
-                // This is an option with a value
-                options[token] = tokens[i+1]
-                i++ // Increment to skip the value part
-            } else {
-                // This is a flag
-                flags.add(token)
+            // Current token is a flag - handle any pending flag first
+            if (!pendingFlag.isEmpty()) {
+                // Previous flag had no value, so it's a standalone flag
+                flags.add(pendingFlag)
             }
+            pendingFlag = token
+        } else {
+            if (!pendingFlag.isEmpty()) {
+                // This token is the value for the pending flag
+                options[pendingFlag] = token
+                pendingFlag = ""
+            }
+            // If no pending flag, this token is ignored (shouldn't happen in well-formed args)
         }
-        i++
+    }
+    
+    if (!pendingFlag.isEmpty()) {
+        flags.add(pendingFlag)
     }
     return [options: options, flags: flags]
 }
@@ -35,11 +42,11 @@ def combineArgs(String defaultArgStr, String metaArgStr) {
     def parsedMeta = parseArguments(metaArgStr ?: "")
 
     // Merge options, meta takes precedence
-    def finalOptions = new HashMap<>(parsedDefaults.options)
+    def finalOptions = new HashMap(parsedDefaults.options)
     finalOptions.putAll(parsedMeta.options) // Meta overrides defaults for same option keys
 
     // Merge flags, ensuring uniqueness
-    def finalFlags = new HashSet<>(parsedDefaults.flags)
+    def finalFlags = new HashSet(parsedDefaults.flags)
     finalFlags.addAll(parsedMeta.flags)
 
     // Reconstruct the argument string

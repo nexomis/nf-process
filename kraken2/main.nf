@@ -26,7 +26,7 @@ process KRAKEN2 {
   kraken2 --thread $task.cpus \\
   --report ${meta.id}.report.txt \\
   --db $db \\
-  ${(reads.size() === 2)? '--paired': ''} \\
+  ${(reads.size() == 2)? '--paired': ''} \\
   ${task.ext.args ?: ''} \\
   $unclassified_args \\
   $reads \\
