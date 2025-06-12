@@ -18,7 +18,13 @@ process KRAKEN2 {
   script:
   def unclassified_args = ""
   if (task.ext.add_unclassified && task.ext.add_unclassified == "yes") {
-    unclassified_args = "--unclassified-out ${meta.label ?: meta.id}.unclassified#.fq"
+    if (reads.size() == 2) {
+      // Paired-end reads: use # placeholder
+      unclassified_args = "--unclassified-out ${meta.label ?: meta.id}.unclassified#.fq"
+    } else {
+      // Single-end reads: no # placeholder
+      unclassified_args = "--unclassified-out ${meta.label ?: meta.id}.unclassified.fq"
+    }
   }
   """
   #!/usr/bin/bash
