@@ -13,9 +13,9 @@ process TRANSFERT_GFF {
 
 
   script:
-  annot_fa = ref[0]
-  annot_gff = ref[1]
-  out_prefix = meta.label ?: meta.id
+  def annot_fa = ref[0]
+  def annot_gff = ref[1]
+  def out_prefix = meta.label ?: meta.id
   template "transfer_annot_by_global_psa.py"
 
   stub:

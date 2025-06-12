@@ -19,7 +19,7 @@ process GUNZIP {
   stub:
   """
   touch ${files[0]}
-  ${(files.size() === 2)? 'touch ' + files[1].toString() : ''}
+  ${(files.size() == 2)? 'touch ' + files[1].toString() : ''}
   """
 
 }

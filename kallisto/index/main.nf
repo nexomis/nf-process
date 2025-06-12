@@ -16,11 +16,13 @@ process KALLISTO_INDEX {
     def prefix = meta.id
     """
     kallisto index \\
+        $args \\
         -i ${prefix}.idx \\
         ${fasta}
     """
 
     stub:
+    def prefix = meta.id
     """
     touch ${prefix}.idx
     """
