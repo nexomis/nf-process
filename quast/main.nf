@@ -7,7 +7,8 @@ process QUAST {
   input:
   tuple val(meta), path(assembly, stageAs: "inputs/assembly??.fa")
   tuple val(meta2), path(ref_fa, stageAs: "inputs/reference.fa")
-  tuple val(meta3), path(bam, stageAs: "inputs/aln??.bam"), path(bai, stageAs: "inputs/aln??.bam.bai") 
+  tuple val(meta3), path(bam, stageAs: "inputs/aln??.bam"), path(bai, stageAs: "inputs/aln??.bam.bai")
+  tuple val(meta4), path(ref_bam, stageAs: "inputs/ref_aln.bam"), path(ref_bai, stageAs: "inputs/ref_aln.bam.bai")
 
   output:
   tuple val(meta), path("${meta.label ?: meta.id}/report.html", type: 'file') , emit: html
@@ -29,6 +30,9 @@ process QUAST {
     }
   }
   if (bam_not_empty) {args_bam = "--bam " + bamList.join(',')}
+  
+  def args_ref_bam = ref_bam.size() > 1 ? "--ref-bam $ref_bam" : ""
+  
   def out_dir = (meta.label ?: meta.id)
   // Note for the --min-contig args https://github.com/ablab/quast/issues/273
   """
@@ -39,6 +43,7 @@ process QUAST {
     --threads $task.cpus \\
     $args_ref \\
     ${args_bam} \\
+    ${args_ref_bam} \\
     ${task.ext.args ?: ''} \\
     $assembly
   """
