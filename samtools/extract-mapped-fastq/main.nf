@@ -20,9 +20,9 @@ process EXTRACT_MAPPED_FASTQ {
   samtools sort -n $bam -o collate.bam -O bam -@ $task.cpus
   
   # SAM FLAGS: 4=read unmapped, 8=mate unmapped, 12=both unmapped (4+8)
-  
   # Extract reads where BOTH mates are mapped (-F 12: exclude flag 4+8, i.e., exclude both unmapped)
   samtools view -@ $task.cpus -b -F 12 -o mapped.bam collate.bam
+  samtools view -@ $task.cpus -b -f 12 -o unmapped.bam collate.bam
   
   # Extract reads where THIS read is unmapped BUT mate is mapped 
   # (-f 4: include read unmapped, -F 8: exclude mate unmapped)
@@ -44,18 +44,19 @@ process EXTRACT_MAPPED_FASTQ {
 
   # Check if data is paired-end by looking for "0 + 0 paired in sequencing" in flagstats
   # If found, use -s (single-end), otherwise use -1/-2 (paired-end)
-  if samtools flagstats collate.bam | grep -q "0 + 0 paired in sequencing"; then
+  samtools view -h collate.bam | head -n 100000 | samtools view -h -b - | samtools flagstats - > flagstats.txt
+  if cat flagstats.txt | grep -rq "^0 + 0 paired in sequencing"; then
     # Single-end data: use -s flag
     samtools fastq -@ $task.cpus merged_sorted.bam \\
       -s ${meta.label ?: meta.id}.mapped_R1.fq.gz
-    samtools fastq -f 12 -@ $task.cpus merged_sorted.bam \\
+    samtools fastq -@ $task.cpus unmapped.bam \\
       -s ${meta.label ?: meta.id}.unmapped_R1.fq.gz
   else
     # Paired-end data: use -1/-2 flags
     samtools fastq -@ $task.cpus merged_sorted.bam \\
       -1 ${meta.label ?: meta.id}.mapped_R1.fq.gz \\
       -2 ${meta.label ?: meta.id}.mapped_R2.fq.gz
-    samtools fastq -f 12 -@ $task.cpus merged_sorted.bam \\
+    samtools fastq -@ $task.cpus unmapped.bam \\
       -1 ${meta.label ?: meta.id}.unmapped_R1.fq.gz \\
       -2 ${meta.label ?: meta.id}.unmapped_R2.fq.gz
   fi
