@@ -1,7 +1,7 @@
 // NOTE: resulting SAM include minimal read_group information (generic value) following GATK specification.
 
 process BOWTIE2 {
-  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/bowtie2:2.5.4--he20e202_3"
+  container "quay.io/biocontainers/bowtie2:2.5.4--he20e202_3"
   tag "$meta.id"
   label 'cpu_high'
   label 'mem_8GB' // 4GB max of foot print: https://hpc.nih.gov/apps/bowtie2.html

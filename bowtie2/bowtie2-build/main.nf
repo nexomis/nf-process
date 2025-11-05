@@ -1,6 +1,6 @@
 
 process BOWTIE2_BUILD {
-  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/bowtie2:2.5.4--he20e202_3"
+  container "quay.io/biocontainers/bowtie2:2.5.4--he20e202_3"
   tag "$meta.id"
   label 'cpu_high'
   label 'mem_8G' // 4GB max of foot print: https://hpc.nih.gov/apps/bowtie2.html

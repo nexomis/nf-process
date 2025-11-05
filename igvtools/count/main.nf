@@ -1,7 +1,7 @@
 // need to be valided in case of multifasta reference (segmenteed virus, contigs, ...)
 
 process IGVTOOLS_COUNT {
-  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/igvtools:2.3.93--0"
+  container "quay.io/biocontainers/igvtools:2.3.93--0"
   tag "$meta.id"
   label 'cpu_x1'
   label 'mem_med'

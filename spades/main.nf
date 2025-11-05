@@ -23,8 +23,8 @@ process SPADES {
   all_args = all_args.replaceAll("  ", " ")
   def args_list = all_args.tokenize(' ')
   args_list = args_list.unique()
-  def containsMeta = args_list.any { (it.startsWith('--meta')) || (it == "--corona") || (it == "--rnaviral")}
-  if (containsMeta) { args_list = args_list.findAll { it != '--careful' } }
+  def containsMeta = args_list.any { it -> (it.startsWith('--meta')) || (it == "--corona") || (it == "--rnaviral")}
+  if (containsMeta) { args_list = args_list.findAll { it -> it != '--careful' } }
   def processed_args = args_list.join(" ")
   """
   #!/usr/bin/bash

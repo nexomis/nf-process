@@ -1,5 +1,5 @@
 process SALMON_QUANT {
-    container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/salmon:1.10.3--haf24da9_3"
+    container "quay.io/biocontainers/salmon:1.10.3--haf24da9_3"
     tag "$meta.id-$meta2.id"
     label 'cpu_med'
     label 'mem_8G'

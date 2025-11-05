@@ -1,7 +1,7 @@
 // ABRA2 can also be run on a spliced-aware bam, but this may require specific parameterization which, for now, is not managed here!
 
 process ABRA2 {
-  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/abra2:2.24--hdcf5f25_3"
+  container "quay.io/biocontainers/abra2:2.24--hdcf5f25_3"
   tag "$meta.id-$meta2.id"
   label 'cpu_low'
   label 'mem_low'

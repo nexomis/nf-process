@@ -1,5 +1,5 @@
 process BWA_MEM {
-  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/bwa:0.7.18--he4a0461_1"
+  container "quay.io/biocontainers/bwa:0.7.18--he4a0461_1"
   tag "$meta.id"
   label 'cpu_high'
   label 'mem_med'

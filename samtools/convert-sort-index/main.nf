@@ -1,8 +1,8 @@
 // todo: make sort and flagstat optionall ?
 
 process SAM_BAM_SORT_IDX {
-  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/samtools:1.20--h50ea8bc_1"
-  tag "$meta.id"
+  container "quay.io/biocontainers/samtools:1.20--h50ea8bc_1"
+
   label 'cpu_high'
   label 'mem_2G_per_cpu'
 

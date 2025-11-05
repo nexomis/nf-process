@@ -14,7 +14,7 @@ process RECENTRIFUGE {
   script:
   def args_files = []
   if (files instanceof List) {
-    files.each{
+    files.each{ it ->
       args_files << it.toString()
     }
   } else {

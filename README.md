@@ -168,7 +168,7 @@ Below are some example of names that can be used.
 
 **Example:**
 ```
-  container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/kallisto:0.50.1--h6de1650_2"
+  container "quay.io/biocontainers/kallisto:0.50.1--h6de1650_2"
 ```
 
 ## 6. Miscellaneous Guidelines

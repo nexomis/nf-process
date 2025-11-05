@@ -3,7 +3,7 @@ process KALLISTO_INDEX {
     label 'cpu_x2'
     label 'mem_8G'
 
-    container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/kallisto:0.50.1--h6de1650_2"
+    container "quay.io/biocontainers/kallisto:0.50.1--h6de1650_2"
 
     input:
     tuple val(meta), path(fasta)
