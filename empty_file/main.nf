@@ -1,6 +1,6 @@
 process EMPTY_FILE {
   container "ubuntu:jammy"
-
+  tag "empty_file"
   label 'cpu_low'
   label 'mem_low'
 

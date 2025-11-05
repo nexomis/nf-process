@@ -2,7 +2,7 @@
 
 process ABRA2 {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/abra2:2.24--hdcf5f25_3"
-
+  tag "$meta.id-$meta2.id"
   label 'cpu_low'
   label 'mem_low'
 

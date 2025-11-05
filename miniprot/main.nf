@@ -1,6 +1,6 @@
 process MINIPROT {
   container "quay.io/biocontainers/miniprot:0.13--he4a0461_0" // does not exists in aws
-
+  tag "$meta.id"
   label 'cpu_low'
   label 'mem_low'
 

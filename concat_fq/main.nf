@@ -1,6 +1,6 @@
 process CONCAT_FQ {
   container 'ubuntu:noble-20241011'
-
+  tag "$meta.id"
   label 'cpu_x1'
   label 'mem_2G'
 

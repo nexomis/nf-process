@@ -1,6 +1,6 @@
 process FASTP {
   container 'staphb/fastp:0.23.4'
-
+  tag "$meta.id"
   label 'cpu_low'
   label 'mem_8G'
 

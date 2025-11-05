@@ -1,6 +1,6 @@
 process SPRING_COMPRESS {
   container 'ghcr.io/nexomis/spring:1.1.1'
-
+  tag "$meta.id"
   label 'cpu_low'
   label 'mem_med'
 

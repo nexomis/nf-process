@@ -1,6 +1,6 @@
 process IVAR_VARIANTS_ALL {
   container "quay.io/nexomis/ivar:1.4.3"
-
+  tag "$meta.id"
   label 'cpu_x1'
   label 'mem_med'
 

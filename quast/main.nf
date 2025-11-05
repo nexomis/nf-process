@@ -1,6 +1,6 @@
 process QUAST {
   container "staphb/quast:5.2.0"
-
+  tag "$meta.id"
   label 'cpu_med'
   label 'mem_med'
   

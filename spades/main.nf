@@ -3,7 +3,7 @@
 
 process SPADES {
   container "quay.io/nexomis/spades:4.0.0-91e677"
-
+  tag "$meta.id"
   label 'cpu_high'
   label 'mem_high'
 

@@ -1,6 +1,6 @@
 process KRAKEN2 {
   container 'ghcr.io/nexomis/kraken2:2.1.3'
-
+  tag "$meta.id"
   label 'cpu_med'
   label 'mem_4G_per_cpu' // params.kraken2_memory ?
 

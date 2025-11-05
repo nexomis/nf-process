@@ -1,6 +1,6 @@
 process SAV_CALL {
   container "quay.io/nexomis/sav_call:0.2.0-py"
-
+  tag "$meta.id"
   label 'cpu_x1'
   label 'mem_med'
 

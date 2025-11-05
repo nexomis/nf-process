@@ -1,6 +1,6 @@
 process FASTP_DEDUP {
   container 'staphb/fastp:0.23.4'
-
+  tag "$meta.id"
   label 'cpu_med'
   label 'mem_32G'
 

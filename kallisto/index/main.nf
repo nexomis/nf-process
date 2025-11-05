@@ -1,5 +1,5 @@
 process KALLISTO_INDEX {
-
+    tag "$meta.id"
     label 'cpu_x2'
     label 'mem_8G'
 

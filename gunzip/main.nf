@@ -1,6 +1,6 @@
 process GUNZIP {
   container 'quay.io/biocontainers/pigz:2.8'
-
+  tag "$meta.id"
   label 'cpu_low'
   label 'mem_2G_per_cpu'
   

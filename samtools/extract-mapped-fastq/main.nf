@@ -1,6 +1,6 @@
 process EXTRACT_MAPPED_FASTQ {
   container "${params.biocontainers_registry ?: 'quay.io'}/biocontainers/samtools:1.20--h50ea8bc_1"
-
+  tag "$meta.id"
   label 'cpu_high'
   label 'mem_2G_per_cpu'
 

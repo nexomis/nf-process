@@ -1,6 +1,6 @@
 process SEQTK_SAMPLE {
   container 'staphb/seqtk:1.4'
-
+  tag "$meta.id"
   label 'cpu_low'
   label 'mem_low'
 

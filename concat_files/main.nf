@@ -1,6 +1,6 @@
 process CONCAT_FILES {
     container "python:3.14.0a7-bookworm"
-
+    tag "$meta.id"
     input:
     tuple val(meta), path(files, stageAs: 'input/*')
 

@@ -1,6 +1,6 @@
 process PICARD_MARK_DUPLICATES {
   container "quay.io/biocontainers/picard:3.3.0--hdfd78af_0"    // 615 MiB !!
-
+  tag "$meta.id-$meta2.od"
   label 'cpu_x1'
   label 'mem_med'
 

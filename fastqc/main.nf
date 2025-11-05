@@ -2,7 +2,7 @@
 
 process FASTQC {
   container 'staphb/fastqc:0.12.1'
-
+  tag "$meta.id"
   label 'cpu_low'
   label 'mem_12G'
 

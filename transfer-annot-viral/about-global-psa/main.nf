@@ -1,6 +1,6 @@
 process TRANSFERT_GFF {
   container "${params.biocontainers_registry ?: 'quay.io'}/nexomis/py-bioseq:102024"
-
+  tag "$meta.id"
   input:
   tuple val(meta), path(sample_fa, arity: 1, stageAs: 'input/')
   tuple val(meta2), path(ref, arity: 2, stageAs: 'input/')
