@@ -1,8 +1,8 @@
 process ABACAS {
   container "quay.io/biocontainers/abacas:1.3.1--pl5321hdfd78af_3"
   tag "$meta.id-$meta2.id"
-  label 'cpu_med'
-  label 'mem_8G'
+  cpus 8
+  memory 8.GB
 
   input:
   tuple val(meta), path(scaffolds, arity: 1, stageAs: 'input_scaffolds.fa')

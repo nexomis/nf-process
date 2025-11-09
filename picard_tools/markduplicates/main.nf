@@ -1,8 +1,8 @@
 process PICARD_MARK_DUPLICATES {
   container "quay.io/biocontainers/picard:3.3.0--hdfd78af_0"    // 615 MiB !!
   tag "$meta.id-$meta2.od"
-  label 'cpu_x1'
-  label 'mem_med'
+  cpus 1
+  memory 15.GB
 
   input:
   tuple val(meta), path(bam, arity: 1, stageAs: 'input_raw/*')      // Must be coordinate sorted (TODO: does not use index 'bai' for save time?) and contains minimal read group information (cf. GATK recquirement)

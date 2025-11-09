@@ -30,7 +30,7 @@ def parseArguments(String argString) {
     }
     
     if (!pendingFlag.isEmpty()) {
-        flags.add(pendingFlag)
+        flags = flags + [pendingFlag]
     }
     return [options: options, flags: flags]
 }
@@ -42,11 +42,11 @@ def combineArgs(String defaultArgStr, String metaArgStr) {
     def parsedMeta = parseArguments(metaArgStr ?: "")
 
     // Merge options, meta takes precedence
-    def finalOptions = new HashMap(parsedDefaults.options)
+    def finalOptions = parsedDefaults.options
     finalOptions.putAll(parsedMeta.options) // Meta overrides defaults for same option keys
 
     // Merge flags, ensuring uniqueness
-    def finalFlags = new HashSet(parsedDefaults.flags)
+    def finalFlags = parsedDefaults.flags
     finalFlags.addAll(parsedMeta.flags)
 
     // Reconstruct the argument string
@@ -59,8 +59,8 @@ def combineArgs(String defaultArgStr, String metaArgStr) {
 
 process CUTADAPT {
     tag "${meta.id}"
-    label 'cpu_low'
-    label 'mem_8G'
+    cpus 4
+    memory 8.GB
 
     container "quay.io/biocontainers/cutadapt:5.0--py312h0fa9677_0"
 

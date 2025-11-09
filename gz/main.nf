@@ -1,8 +1,8 @@
 process GZ {
   container 'quay.io/biocontainers/pigz:2.8'
   tag "$meta.id"
-  label 'cpu_low'
-  label 'mem_2G_per_cpu'
+  cpus 4
+  memory 8.GB
   
   input:
   tuple val(meta), path(files, arity: 1..2)
@@ -11,7 +11,7 @@ process GZ {
   tuple val(meta), path("*.gz")
 
   script:
-  def cmd = "pigz -f -p " + task.cpus + " --keep --no-time "
+  def cmd = "pigz -f -p $task.cpus --keep --no-time "
   """
   $cmd $files
   """

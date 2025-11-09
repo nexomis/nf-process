@@ -1,8 +1,8 @@
 process SLIMFASTQ_COMPRESS {
   container 'quay.io/biocontainers/slimfastq:2.04--h503566f_5'
   tag "${meta.id}"
-  label 'cpu_x2'
-  label 'mem_4G'
+  cpus 2
+  memory 4.GB
 
   input:
   tuple val(meta), path(files, arity: 1..2, stageAs: "inputs/*")

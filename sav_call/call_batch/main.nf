@@ -1,8 +1,8 @@
 process CALL_BATCH {
   container "quay.io/nexomis/sav_call:0.2.0-py"
   tag "$meta.id"
-  label 'cpu_x1'
-  label 'mem_med'
+  cpus 1
+  memory 15.GB
 
   input:
   tuple val(meta), path(base_files), path(indel_files)  // base_files and indel_files from sav_call outputs grouped by batch

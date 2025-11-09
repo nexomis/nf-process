@@ -1,0 +1,92 @@
+nextflow_process {
+
+    name "Test Process WRITE_GREETING"
+    script "modules/process/tuto/write_greeting/main.nf"
+    process "WRITE_GREETING"
+
+    test("Should create markdown greeting for sample Alice") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [
+                        id: 'Alice',
+                        title: 'Ms',
+                        level: 'intermediate'
+                    ]
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.markdown.size() == 1
+            
+            def meta = process.out.markdown[0][0]
+            def md_file = process.out.markdown[0][1]
+            
+            assert meta.id == 'Alice'
+            assert md_file.name == 'Alice.md'
+            assert md_file.exists()
+            
+            def content = md_file.text
+            assert content.contains('Hello, Ms Alice!')
+            assert content.contains('intermediate')
+        }
+
+    }
+
+    test("Should use default values when not provided") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [
+                        id: 'Bob'
+                    ]
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            
+            def md_file = process.out.markdown[0][1]
+            def content = md_file.text
+            
+            assert content.contains('Hello, Mr/Ms Bob!')
+            assert content.contains('beginner')
+        }
+
+    }
+
+    test("Should work with stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [
+                        id: 'Charlie',
+                        title: 'Dr',
+                        level: 'advanced'
+                    ]
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.markdown[0][1].name == 'Charlie.md'
+        }
+
+    }
+
+}

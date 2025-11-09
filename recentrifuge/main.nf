@@ -1,7 +1,7 @@
 process RECENTRIFUGE {
   container 'quay.io/biocontainers/recentrifuge:1.14.1--pyhdfd78af_0'
-  label 'cpu_x1'
-  label 'mem_low'
+  cpus 1
+  memory 7.GB
 
   input:
   path(files)

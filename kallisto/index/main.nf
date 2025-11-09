@@ -1,7 +1,7 @@
 process KALLISTO_INDEX {
     tag "$meta.id"
-    label 'cpu_x2'
-    label 'mem_8G'
+    cpus 2
+    memory 8.GB
 
     container "quay.io/biocontainers/kallisto:0.50.1--h6de1650_2"
 

@@ -1,8 +1,8 @@
 process SALMON_INDEX {
     container "quay.io/biocontainers/salmon:1.10.3--haf24da9_3"
     tag "$meta.id"
-    label 'cpu_x4'
-    label 'mem_16G'
+    cpus 4
+    memory 16.GB
 
     input:
     tuple val(meta), path(fasta, stageAs: 'input/*')

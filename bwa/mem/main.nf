@@ -1,8 +1,8 @@
 process BWA_MEM {
   container "quay.io/biocontainers/bwa:0.7.18--he4a0461_1"
   tag "$meta.id"
-  label 'cpu_high'
-  label 'mem_med'
+  cpus 16
+  memory 15.GB
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')

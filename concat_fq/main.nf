@@ -1,8 +1,8 @@
 process CONCAT_FQ {
   container 'ubuntu:noble-20241011'
   tag "$meta.id"
-  label 'cpu_x1'
-  label 'mem_2G'
+  cpus 1
+  memory 2.GB
 
   input:
   tuple val(meta), path(fastq1, arity: 1..2, stageAs: 'input1/*')

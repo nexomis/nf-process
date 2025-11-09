@@ -1,8 +1,9 @@
 process KRAKEN2 {
   container 'ghcr.io/nexomis/kraken2:2.1.3'
   tag "$meta.id"
-  label 'cpu_med'
-  label 'mem_4G_per_cpu' // params.kraken2_memory ?
+
+  cpus 8
+  memory 1.GB * Math.ceil(db.directorySize() / (1024 ** 3) + 2 * task.attempt)
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')

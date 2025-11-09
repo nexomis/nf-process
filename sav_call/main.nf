@@ -1,8 +1,8 @@
 process SAV_CALL {
   container "quay.io/nexomis/sav_call:0.2.0-py"
   tag "$meta.id"
-  label 'cpu_x1'
-  label 'mem_med'
+  cpus 1
+  memory 15.GB
 
   input:
   tuple val(meta), path(bam, arity: 1..2, stageAs: 'input/')        // bam[0] is bam file [recquired] and bam[1] is its index (bai) [by default optional, but it may be necessary (and therefore required) on other sav_call version (depending on particular pileup options: in particular region-specific options)]

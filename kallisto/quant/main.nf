@@ -2,8 +2,8 @@
 process KALLISTO_QUANT {
   container "quay.io/biocontainers/kallisto:0.50.1--h6de1650_2"
   tag "$meta.id"
-  label 'cpu_med'
-  label 'mem_8G'
+  cpus 8
+  memory 8.GB
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')

@@ -1,8 +1,8 @@
 process SPRING_COMPRESS {
   container 'ghcr.io/nexomis/spring:1.1.1'
   tag "$meta.id"
-  label 'cpu_low'
-  label 'mem_med'
+  cpus 4
+  memory 15.GB
 
   input:
   tuple val(meta), path(files, arity: 1..2, stageAs: "inputs/*")
@@ -16,7 +16,7 @@ process SPRING_COMPRESS {
   """
   #!/usr/bin/bash
 
-  spring -q ${params.quality_mode} -t ${task.cpus} -c -i ${files} -o ${meta.id}.spring \\
+  spring ${meta.args_spring} -t ${task.cpus} -c -i ${files} -o ${meta.id}.spring \\
     ${task.ext.args ? task.ext.args : ''} \\
     ${(files[0].getExtension() in gz_extensions) ? '-g' : ''}
   """

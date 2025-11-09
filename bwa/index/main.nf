@@ -1,7 +1,7 @@
 process BWA_INDEX {
   container "quay.io/biocontainers/bwa:0.7.18--he4a0461_1"
   tag "$meta.id"
-  label 'cpu_x1'
+  cpus 1
   label 'mem_8GB'
 
   input:

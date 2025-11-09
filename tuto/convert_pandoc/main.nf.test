@@ -1,0 +1,91 @@
+nextflow_process {
+
+    name "Test Process CONVERT_PANDOC"
+    script "modules/process/tuto/convert_pandoc/main.nf"
+    process "CONVERT_PANDOC"
+
+    test("Should convert markdown to PDF") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [
+                        id: 'TestDoc',
+                        output_format: 'pdf'
+                    ],
+                    file('${projectDir}/tests/data/test.md')
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.document.size() == 1
+            
+            def meta = process.out.document[0][0]
+            def doc_file = process.out.document[0][1]
+            
+            assert meta.id == 'TestDoc'
+            assert meta.output_format == 'pdf'
+            assert doc_file.name == 'TestDoc.pdf'
+            assert doc_file.exists()
+            assert doc_file.size() > 0
+        }
+
+    }
+
+    test("Should convert markdown to RTF") {
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [
+                        id: 'TestRTF',
+                        output_format: 'rtf'
+                    ],
+                    file('${projectDir}/tests/data/test.md')
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            
+            def doc_file = process.out.document[0][1]
+            
+            assert doc_file.name == 'TestRTF.rtf'
+            assert doc_file.exists()
+        }
+
+    }
+
+    test("Should work with stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [
+                        id: 'StubTest',
+                        output_format: 'pdf'
+                    ],
+                    file('${projectDir}/tests/data/test.md')
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.document[0][1].name == 'StubTest.pdf'
+        }
+
+    }
+
+}

@@ -1,8 +1,8 @@
 process MINIPROT {
   container "quay.io/biocontainers/miniprot:0.13--he4a0461_0" // does not exists in aws
   tag "$meta.id"
-  label 'cpu_low'
-  label 'mem_low'
+  cpus 4
+  memory 7.GB
 
   input:
   tuple val(meta), path(genome_fasta, arity: 1, stageAs: "inputs/genome.fa")

@@ -1,8 +1,8 @@
 process FASTP {
   container 'staphb/fastp:0.23.4'
   tag "$meta.id"
-  label 'cpu_low'
-  label 'mem_8G'
+  cpus 4
+  memory 8.GB
 
   input:
   tuple val(meta), path(files, arity: 1..2, stageAs: 'input_raw/*')

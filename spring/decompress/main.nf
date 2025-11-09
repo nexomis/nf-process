@@ -4,8 +4,8 @@ process SPRING_DECOMPRESS {
 
   container 'ghcr.io/nexomis/spring:1.1.1'
   tag "$meta.id"
-  label 'cpu_low'
-  label 'mem_med'
+  cpus 4
+  memory 15.GB
 
   input:
   tuple val(meta), path(spring_file, arity: 1)

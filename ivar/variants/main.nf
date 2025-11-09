@@ -1,8 +1,8 @@
 process IVAR_VARIANTS_ALL {
   container "quay.io/nexomis/ivar:1.4.3"
   tag "$meta.id"
-  label 'cpu_x1'
-  label 'mem_med'
+  cpus 1
+  memory 15.GB
 
   input:
   tuple val(meta), path(bam, arity: 1..2, stageAs: 'input/')        // bam[0] is bam file [recquired] and bam[1] is its index (bai) [by default optional, but it may be necessary (and therefore required) depending on particular samtools mpileup options ( in particular region-specific options such as '-r')]

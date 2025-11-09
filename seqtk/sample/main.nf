@@ -1,8 +1,8 @@
 process SEQTK_SAMPLE {
   container 'staphb/seqtk:1.4'
   tag "$meta.id"
-  label 'cpu_low'
-  label 'mem_low'
+  cpus 4
+  memory 7.GB
 
   input:
   tuple val(meta), path(files, arity: 1..2, stageAs: 'input_raw/*')

@@ -2,8 +2,8 @@
 process BOWTIE2_BUILD {
   container "quay.io/biocontainers/bowtie2:2.5.4--he20e202_3"
   tag "$meta.id"
-  label 'cpu_high'
-  label 'mem_8G' // 4GB max of foot print: https://hpc.nih.gov/apps/bowtie2.html
+  cpus 16
+  memory 8.GB // 4GB max of foot print: https://hpc.nih.gov/apps/bowtie2.html
 
   input:
   tuple val(meta), path(fasta, arity: 1, stageAs: 'input_raw/*')

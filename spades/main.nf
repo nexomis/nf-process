@@ -4,8 +4,8 @@
 process SPADES {
   container "quay.io/nexomis/spades:4.0.0-91e677"
   tag "$meta.id"
-  label 'cpu_high'
-  label 'mem_high'
+  cpus 16
+  memory 30.GB
 
   input:
   tuple val(meta), path(reads, arity: 1..2, stageAs: 'input_raw/*')
@@ -16,16 +16,6 @@ process SPADES {
 
   script:
   def out_dir = meta.label ?: meta.id
-  def all_args = (task.ext.args ?: '') + " " + (meta.args_spades ?: '')
-  if (all_args == " "){
-    all_args=""
-  }
-  all_args = all_args.replaceAll("  ", " ")
-  def args_list = all_args.tokenize(' ')
-  args_list = args_list.unique()
-  def containsMeta = args_list.any { it -> (it.startsWith('--meta')) || (it == "--corona") || (it == "--rnaviral")}
-  if (containsMeta) { args_list = args_list.findAll { it -> it != '--careful' } }
-  def processed_args = args_list.join(" ")
   """
   #!/usr/bin/bash
 
@@ -35,7 +25,7 @@ process SPADES {
     --memory ${task.memory.toGiga()} \\
     -o ${out_dir} \\
     ${ (reads.size() == 1) ? "-s ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}" } \\
-    $processed_args
+    ${task.ext.args ?: ''} ${meta.args_spades ?: ''}
 
   if [ -f "${out_dir}/scaffolds.fasta" ] && [ -f "${out_dir}/raw_scaffolds.fasta" ]; then
     rm "${out_dir}/raw_scaffolds.fasta"

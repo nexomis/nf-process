@@ -1,8 +1,8 @@
 process QUAST {
   container "staphb/quast:5.2.0"
   tag "$meta.id"
-  label 'cpu_med'
-  label 'mem_med'
+  cpus 8
+  memory 15.GB
   
   input:
   tuple val(meta), path(assembly, stageAs: "inputs/assembly??.fa")
@@ -53,6 +53,6 @@ process QUAST {
   """
   #!/usr/bin/bash
   mkdir $out_dir
-  touch $out_dir.log $out_dir/report.html $out_dir/report.tsv $out_dir/report.tex $out_dir/icarus.html ${meta.id}/report.pdf 
+  touch ${out_dir}.log $out_dir/report.html $out_dir/report.tsv $out_dir/report.tex $out_dir/icarus.html ${meta.id}/report.pdf 
   """
 }

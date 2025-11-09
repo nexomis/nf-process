@@ -3,7 +3,7 @@
 process BOWTIE2 {
   container "quay.io/biocontainers/bowtie2:2.5.4--he20e202_3"
   tag "$meta.id"
-  label 'cpu_high'
+  cpus 16
   label 'mem_8GB' // 4GB max of foot print: https://hpc.nih.gov/apps/bowtie2.html
 
   input:

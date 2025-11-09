@@ -1,8 +1,8 @@
 process EXTRACT_MAPPED_FASTQ {
   container "quay.io/biocontainers/samtools:1.20--h50ea8bc_1"
   tag "$meta.id"
-  label 'cpu_high'
-  label 'mem_2G_per_cpu'
+  cpus 16
+  memory 2.GB * task.cpus
 
   input:
   tuple val(meta), path(bam, arity: 1, stageAs: 'input_raw/*')

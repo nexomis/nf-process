@@ -3,8 +3,8 @@
 process IGVTOOLS_COUNT {
   container "quay.io/biocontainers/igvtools:2.3.93--0"
   tag "$meta.id"
-  label 'cpu_x1'
-  label 'mem_med'
+  cpus 1
+  memory 15.GB
 
   input:
   tuple val(meta), path(bam, arity: 1..2, stageAs: 'input/')   // bam[0] is bam file [recquired] and bam[1] is its index (bai) [optional but save time if its provided]
