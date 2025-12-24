@@ -1,7 +1,7 @@
 nextflow_process {
 
     name "Test Process WRITE_GREETING"
-    script "modules/process/tuto/write_greeting/main.nf"
+    script "tuto/write_greeting/main.nf"
     process "WRITE_GREETING"
 
     test("Should create markdown greeting for sample Alice") {
@@ -10,11 +10,9 @@ nextflow_process {
             process {
                 """
                 input[0] = [
-                    [
-                        id: 'Alice',
-                        title: 'Ms',
-                        level: 'intermediate'
-                    ]
+                    id: 'Alice',
+                    title: 'Ms',
+                    level: 'intermediate'
                 ]
                 """
             }
@@ -44,9 +42,7 @@ nextflow_process {
             process {
                 """
                 input[0] = [
-                    [
-                        id: 'Bob'
-                    ]
+                    id: 'Bob'
                 ]
                 """
             }
@@ -72,11 +68,9 @@ nextflow_process {
             process {
                 """
                 input[0] = [
-                    [
-                        id: 'Charlie',
-                        title: 'Dr',
-                        level: 'advanced'
-                    ]
+                    id: 'Charlie',
+                    title: 'Dr',
+                    level: 'advanced'
                 ]
                 """
             }

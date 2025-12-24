@@ -1,7 +1,7 @@
 nextflow_process {
 
     name "Test Process CONVERT_PANDOC"
-    script "modules/process/tuto/convert_pandoc/main.nf"
+    script "tuto/convert_pandoc/main.nf"
     process "CONVERT_PANDOC"
 
     test("Should convert markdown to PDF") {
@@ -9,13 +9,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [
-                    [
-                        id: 'TestDoc',
-                        output_format: 'pdf'
-                    ],
-                    file('${projectDir}/tests/data/test.md')
-                ]
+                input[0] = Channel.of([id: 'Test'])
                 """
             }
         }
@@ -41,13 +35,10 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [
-                    [
-                        id: 'TestRTF',
-                        output_format: 'rtf'
-                    ],
+                input[0] = Channel.of([
+                    [id: 'TestRTF', output_format: 'rtf']
                     file('${projectDir}/tests/data/test.md')
-                ]
+                ])
                 """
             }
         }
